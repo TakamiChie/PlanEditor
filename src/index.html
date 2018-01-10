@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" type="text/css" href="index.css">
+  <!-- 暫定。あとでnpmから入れる -->
+  <link rel="stylesheet" href="https://unpkg.com/onsenui/css/onsenui.css">
+  <link rel="stylesheet" href="https://unpkg.com/onsenui/css/onsen-css-components.min.css">
+  <title>Plan Editor</title>
+</head>
+<body>
+  <div id="container">
+    <table id="editorui">
+      <thead>
+        <tr>
+          <th>項番</th>
+          <th class="editable">章題</th>
+          <th class="editable">予想工数</th>
+          <th class="editable">備考</th>
+          <th>Graph</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td colspan="5" class="pushable"><button class="button" id="appendrow">行を追加</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <script src="https://unpkg.com/onsenui/js/onsenui.min.js"></script>
+  <script src="index.js"></script>
+</body>
+</html>

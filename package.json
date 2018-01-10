@@ -1,0 +1,16 @@
+{
+  "name": "wdchamomile",
+  "version": "0.1.0",
+  "description": "Spreadsheet editor for proposal preparation.",
+  "main": "src/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "TakamiChie",
+  "license": "MIT",
+  "devDependencies": {
+    "bootstrap-honoka": "^3.3.7-a",
+    "electron": "^1.7.10"
+  },
+  "dependencies": {}
+}
