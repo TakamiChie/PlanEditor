@@ -10,6 +10,7 @@ div#container {
 table#editorui {
   border: 3px solid black;
   background-color: transparent;
+  width: 100%;
 }
 
 table#editorui th, table#editorui td {
@@ -20,6 +21,10 @@ table#editorui th, table#editorui td {
 table#editorui td.editable {
   background-color: white;
   border: 2px outset gray;
+}
+
+table#editorui td:focus {
+  border: transparent 2px solid;
 }
 
 table#editorui td.pushable {
