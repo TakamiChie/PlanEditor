@@ -32,7 +32,14 @@
       <label for="dlg-append-columns_columnname">列の名前</label>
       <input id="dlg-append-columns_columnname" name="columnname">
       <label for="dlg-append-columns_columnrole">列の役割</label>
-      <input id="dlg-append-columns_columnrole" name="columnrole">
+      <select id="dlg-append-columns_columnrole" name="columnrole">
+          <option value="CHAPTER">章/見出し名</option>
+          <option value="AGGREGATE">集計可能な数値</option>
+          <option value="CHARGE">担当者名</option>
+          <option value="TEXT">通常テキスト</option>
+          <option value="NUMBER">集計しない数字</option>
+          <option value="DATE">日付</option>
+        </select>
       <button type="submit" value="ok" class="button">追加</button>
       <button type="cancel" value="cancel" class="button button--light">追加しない</button>
     </form>
