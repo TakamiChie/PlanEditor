@@ -1,13 +1,14 @@
 // ref:https://github.com/theodi/comma-chameleon/blob/master/main/menu.js
 exports.menu = [
   {
-    label: "File",
+    label: "ファイル",
   },
   {
-    label: "Dev",
-      submenu: [
       {
-        label: "Developer Tools",
+    label: "ヘルプ",
+    submenu: [
+      {
+        label: "開発者ツール",
         accelerator: "CmdOrCtrl+Shift+I",
         click: function() { BrowserWindow.getFocusedWindow().toggleDevTools(); }
       }
