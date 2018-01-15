@@ -27,6 +27,16 @@
       </tbody>
     </table>
   </div>
+  <dialog id="dlg-append-columns">
+    <form method="dioalog">
+      <label for="dlg-append-columns_columnname">列の名前</label>
+      <input id="dlg-append-columns_columnname" name="columnname">
+      <label for="dlg-append-columns_columnrole">列の役割</label>
+      <input id="dlg-append-columns_columnrole" name="columnrole">
+      <button type="submit" value="ok" class="button">追加</button>
+      <button type="cancel" value="cancel" class="button button--light">追加しない</button>
+    </form>
+  </dialog>
   <script src="https://unpkg.com/onsenui/js/onsenui.min.js"></script>
   <script src="index.js"></script>
 </body>

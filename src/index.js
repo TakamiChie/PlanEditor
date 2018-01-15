@@ -8,6 +8,23 @@ const ROLE = {
   STATIC: "STATIC"
 }
 
+require("electron").ipcRenderer.on("appendColumn", (e) => {
+  const dlg = document.querySelector("#dlg-append-columns");
+  return new Promise((resolve, reject) => {
+    dlg.showModal();
+
+    function onClose(event){
+      dlg.removeEventListener("close", onClose);
+      if(dlg.returnValue === "ok"){
+        // OK
+      } else{
+        reject();
+      }
+    }
+    dlg.addEventListener("close", onClose, {once: true});
+  });
+});
+
 function createCell({
   rowobject, 
   insertIndex = -1,
