@@ -28,23 +28,13 @@ let settings = {
 };
 
 require("electron").ipcRenderer.on("appendColumn", (e) => {
-  const dlg = document.querySelector("#dlg-append-columns");
-  return new Promise((resolve, reject) => {
-    dlg.showModal();
+  menuop_append_column();
+});
 
-    function onClose(event){
-      dlg.removeEventListener("close", onClose);
-      if(dlg.returnValue === "ok"){
-        // OK
-        var cn = document.querySelector("#dlg-append-columns_columnname").value;
-        var cr = document.querySelector("#dlg-append-columns_columnrole").value;
-        resolve({name: cn, role: cr});
-      } else{
-        reject();
-      }
-    }
-    dlg.addEventListener("close", onClose, {once: true});
-  }).then((value) => {
+//////////// メニュー用メソッド //////////////
+
+function menuop_append_column() {
+  showColumnDialog().then((value) => {
     // 設定値更新
     settings.rows.push({name: value.name, role: value.role});
     let editorui = document.querySelector("#editorui");
@@ -71,7 +61,8 @@ require("electron").ipcRenderer.on("appendColumn", (e) => {
     // 最終行の列数追加
     rows[rows.length - 1].colspan = settings.rows.length + 1;
   });
-});
+}
+//////////// 各種メソッド //////////////
 
 /**
  * セルを追加する
@@ -113,6 +104,43 @@ function createCell({
   cell.dataset.role = role;
   cell.textContent = value;
   return cell;
+}
+
+/**
+ * カラム名称ダイアログを表示する
+ * @param {*name} name 列の名称（デフォルト値）。初期値は空文字列
+ * @param {*role} role 列のロール（デフォルト値）。初期値はROLE.CHAPTER
+ * @returns ダイアログの結果を示すPromiseオブジェクト
+ */
+function showColumnDialog(name = "", role = ROLE.CHAPTER){
+  const dlg = document.querySelector("#dlg-columns");
+
+  return new Promise((resolve, reject) => {
+    // 初期値設定
+    var refresh = () => {
+      let e = document.querySelector("#dlg-columns_columnname");
+      document.querySelector("#dlg-columns_ok").disabled = e.value == "";
+    }
+    document.querySelector("#dlg-columns_columnname").value = name;
+    refresh();
+    document.querySelector("#dlg-columns_columnname").onchange = refresh;
+    document.querySelector("#dlg-columns_columnrole").value = role;
+    // 表示
+    dlg.showModal();
+
+    function onClose(event){
+      dlg.removeEventListener("close", onClose);
+      if(dlg.returnValue === "ok"){
+        // OK
+        var cn = document.querySelector("#dlg-columns_columnname").value;
+        var cr = document.querySelector("#dlg-columns_columnrole").value;
+        resolve({name: cn, role: cr});
+      } else{
+        reject();
+      }
+    }
+    dlg.addEventListener("close", onClose, {once: true});
+  });
 }
 
 /**
