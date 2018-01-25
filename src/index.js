@@ -144,7 +144,7 @@ function showColumnDialog(append = false, name = "", role = ROLE.CHAPTER){
         settings.rows.forEach(r => {
           if(r.role == ROLE.CHARGE){
             ok = false;
-            msg = "担当者列を二つ以上定義することは出来ません";
+            msg = "担当者列を二つ以上<br>定義することは出来ません";
           } ;
         });
       }
