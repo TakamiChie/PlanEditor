@@ -151,7 +151,7 @@ function showColumnDialog(append = false, name = "", role = ROLE.CHAPTER){
       document.querySelector("#dlg-columns_ok").disabled = !ok;
       let err = document.querySelector("#dlg-columns_errormsg");
       err.style.visibility = ok ? "hidden" : "visible";
-      err.textContent = msg;
+      err.innerHTML = msg;
   }
     cr.value = role;
     // 表示
