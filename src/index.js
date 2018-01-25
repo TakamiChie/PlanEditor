@@ -113,6 +113,36 @@ function createCell({
   return cell;
 }
 
+
+/**
+ * 列を並び替える
+ * @param {number} srcIndex 並び替え元の列インデックス
+ * @param {number} dstIndex 並び替え先の列インデックス
+ */
+function swapColumn(srcIndex, dstIndex){
+  if(1 > srcIndex || srcIndex >= settings.rows.length){
+    throw "Range Error At srcIndex"
+  }
+  if(1 > dstIndex || dstIndex >= settings.rows.length){
+    throw "Range Error At dstIndex"
+  }
+  // 設定値の並び替え
+  var tmp = settings.rows[srcIndex];
+  settings.rows[srcIndex] = settings.rows[dstIndex];
+  settings.rows[dstIndex] = tmp;
+  // セルの並び替え
+  let editorui = document.querySelector("#editorui");
+  let rows = editorui.rows;
+  for (let i = 0; i < rows.length - 1; i++) {
+    var src = rows[i].cells[srcIndex];
+    var dst = rows[i].cells[dstIndex];
+    var srcC = src.cloneNode(true);
+    var dstC = dst.cloneNode(true);
+    src.parentNode.replaceChild( dstC, src );
+    dst.parentNode.replaceChild( srcC, dst );
+  }
+}
+
 /**
  * カラム名称ダイアログを表示する
  * @param {boolean} append ダイアログはカラムを追加するか、それとも編集するか。初期値はfalse（編集ダイアログ）
