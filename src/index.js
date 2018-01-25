@@ -101,10 +101,7 @@ function createCell({
       let colmenu = document.querySelector("#dlg-colmenu");
       cell.innerHTML = colmenu.innerHTML;
       cell.querySelector(".text").textContent = value;
-      cell.querySelectorAll(".dropdown-menu > li").forEach((i) => {
-        let a = i.querySelector("a");
-        a.addEventListener("click", colmenu_onclick);
-      });
+      resetEventHandler(cell, colmenu_onclick);
     }
     if(insertIndex == -1){
       rowobject.appendChild( cell );
@@ -128,6 +125,19 @@ function createCell({
   return cell;
 }
 
+/**
+ * セルのメニューにイベントハンドラを再セットする
+ * @description swapColumn実施後、イベントハンドラが消えることがあるため再設定する
+ * @param {HTMLTableCellElement} cell セルオブジェクト
+ * @param {EventHandler} eventHandler イベントハンドラ
+ */
+function resetEventHandler(cell, eventHandler) {
+  cell.querySelectorAll(".dropdown-menu > li").forEach((i) => {
+    let a = i.querySelector("a");
+    a.removeEventListener("click", colmenu_onclick);
+    a.addEventListener("click", colmenu_onclick);
+  });
+}
 
 /**
  * 列を並び替える
@@ -159,6 +169,10 @@ function swapColumn(srcIndex, dstIndex){
     var dstC = dst.cloneNode(true);
     src.parentNode.replaceChild( dstC, src );
     dst.parentNode.replaceChild( srcC, dst );
+    if(i == 0){
+      resetEventHandler(srcC, colmenu_onclick);
+      resetEventHandler(dstC, colmenu_onclick);
+    }
   }
   saveSettings();
 }
