@@ -36,11 +36,40 @@ require("electron").ipcRenderer.on("appendColumn", (e) => {
       dlg.removeEventListener("close", onClose);
       if(dlg.returnValue === "ok"){
         // OK
+        var cn = document.querySelector("#dlg-append-columns_columnname").value;
+        var cr = document.querySelector("#dlg-append-columns_columnrole").value;
+        resolve({name: cn, role: cr});
       } else{
         reject();
       }
     }
     dlg.addEventListener("close", onClose, {once: true});
+  }).then((value) => {
+    // 設定値更新
+    settings.rows.push({name: value.name, role: value.role});
+    let editorui = document.querySelector("#editorui");
+    let rows = editorui.rows;
+    // セルの追加
+    for (let i = 0; i < rows.length - 1; i++) {
+      if(i == 0){
+        // ヘッダ行
+        createCell({
+          rowobject: rows.item(i),
+          value: value.name,
+          insertIndex: -1,
+          header: true
+        });
+      }else{
+        // データ行
+        createCell({
+          rowobject: rows.item(i),
+          role: value.role,
+          insertIndex: -1,
+        });        
+      }
+    }
+    // 最終行の列数追加
+    rows[rows.length - 1].colspan = settings.rows.length + 1;
   });
 });
 
