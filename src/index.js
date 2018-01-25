@@ -50,11 +50,11 @@ function menuop_append_column() {
 
 /**
  * セルを追加する
- * @param rowobject 行を示すオブジェクト
- * @param insertindex セルを追加するインデックス。省略時-1
- * @param role セルのロール。省略時ROLE.STATIC
- * @param value セルの値。省略時は空文字列
- * @param header セルはヘッダセルかどうか。省略時false
+ * @param {HTMLRowObject} rowobject 行を示すオブジェクト
+ * @param {number} insertindex セルを追加するインデックス。省略時-1
+ * @param {ROLE} role セルのロール。省略時ROLE.STATIC
+ * @param {string} value セルの値。省略時は空文字列
+ * @param {boolean} header セルはヘッダセルかどうか。省略時false
  */
 function createCell({
   rowobject, 
@@ -92,8 +92,8 @@ function createCell({
 
 /**
  * カラム名称ダイアログを表示する
- * @param {*name} name 列の名称（デフォルト値）。初期値は空文字列
- * @param {*role} role 列のロール（デフォルト値）。初期値はROLE.CHAPTER
+ * @param {string} name 列の名称（デフォルト値）。初期値は空文字列
+ * @param {ROLE} role 列のロール（デフォルト値）。初期値はROLE.CHAPTER
  * @returns ダイアログの結果を示すPromiseオブジェクト
  */
 function showColumnDialog(name = "", role = ROLE.CHAPTER){
