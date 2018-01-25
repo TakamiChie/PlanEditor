@@ -30,11 +30,22 @@ function createCell({
   insertIndex = -1,
   role = ROLE.STATIC,
   value = "",
+  header = false
 } = {}){
   if(rowobject == undefined){
     throw new Error("Argument `rowobject` is not defined");
   }
-  let cell = rowobject.insertCell(insertIndex);
+  let cell;
+  if(header){
+    cell = document.createElement("th");
+    if(insertIndex == -1){
+      rowobject.appendChild( cell );
+    }else{
+      rowobject.insertBefore( cell, rowobject.rows[insertIndex] );
+    }
+  }else{
+    cell = rowobject.insertCell(insertIndex);
+  }
   if(role == ROLE.STATIC){
     // セルはラベル
     cell.contentEditable = false;
