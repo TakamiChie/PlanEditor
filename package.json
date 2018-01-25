@@ -10,7 +10,8 @@
   "license": "MIT",
   "devDependencies": {
     "bootstrap-honoka": "^3.3.7-a",
-    "electron": "^1.7.10",
+    "electron": "^1.8.1",
+    "electron-json-storage": "^4.0.2",
     "less": "^2.7.3"
   },
   "dependencies": {}

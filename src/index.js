@@ -8,24 +8,7 @@ const ROLE = {
   STATIC: "STATIC"
 }
 
-let settings = {
-  // TODO: デフォルト値を外部化
-  rows : [
-    {
-      name: "No",
-      role: ROLE.STATIC
-    },{
-      name: "章",
-      role: ROLE.CHAPTER
-    },{
-      name: "作業工数",
-      role: ROLE.AGGREGATE
-    },{
-      name: "備考",
-      role: ROLE.TEXT
-    }
-  ]
-};
+let settings;
 
 require("electron").ipcRenderer.on("appendColumn", (e) => {
   menuop_append_column();
@@ -60,6 +43,7 @@ function menuop_append_column() {
     }
     // 最終行の列数追加
     rows[rows.length - 1].colspan = settings.rows.length + 1;
+    saveSettings();
   });
 }
 //////////// 各種メソッド //////////////
@@ -144,13 +128,61 @@ function showColumnDialog(name = "", role = ROLE.CHAPTER){
 }
 
 /**
+ *  設定値を直ちに保存する
+ */
+function saveSettings(){
+  const storage = require("electron-json-storage");
+  storage.set("config", settings, (e) => {
+    if(error){
+      alert(error);
+      throw error;
+    } ;
+  })
+}
+/**
  * 初期化
  */
 function init(){
-  // テーブル初期化
-  let editorui = document.querySelector("#editorui");
-  var row = editorui.insertRow(editorui.rows.length - 1);
-  settings.rows.forEach(r => {
+  // 初期値設定
+  settings = {
+    // TODO: デフォルト値を外部化
+    rows : [
+      {
+        name: "No",
+        role: ROLE.STATIC
+      },{
+        name: "章",
+        role: ROLE.CHAPTER
+      },{
+        name: "作業工数",
+        role: ROLE.AGGREGATE
+      },{
+        name: "備考",
+        role: ROLE.TEXT
+      }
+    ]
+  }
+  // 設定値読み込み
+  const storage = require("electron-json-storage");
+
+  new Promise((resolve, reject) => {
+    storage.get("config", (error, data) => {
+      if(error){
+        alert(error);
+        throw error;
+      } ;
+  
+      if(Object.keys(data).length != 0){
+        settings = data;
+      }
+      resolve();
+    });
+  }).then(() => {
+    console.log(settings);
+    // テーブル初期化
+    let editorui = document.querySelector("#editorui");
+    var row = editorui.insertRow(editorui.rows.length - 1);
+    settings.rows.forEach(r => {
       createCell({
         rowobject: row,
         insertIndex: -1,
@@ -159,6 +191,7 @@ function init(){
         header: true
       })
     });
+  });
 }
 
 document.querySelector("#appendrow").addEventListener("click", () =>{
