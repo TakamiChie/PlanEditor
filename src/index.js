@@ -187,7 +187,7 @@ function lastRowUpdate(){
  */
 function saveSettings(){
   const storage = require("electron-json-storage");
-  storage.set("config", settings, (e) => {
+  storage.set("config", settings, (error) => {
     if(error){
       alert(error);
       throw error;
