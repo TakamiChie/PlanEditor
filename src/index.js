@@ -121,10 +121,13 @@ function createCell({
  */
 function swapColumn(srcIndex, dstIndex){
   if(1 > srcIndex || srcIndex >= settings.rows.length){
-    throw "Range Error At srcIndex"
+    throw "Range Error At srcIndex";
   }
   if(1 > dstIndex || dstIndex >= settings.rows.length){
-    throw "Range Error At dstIndex"
+    throw "Range Error At dstIndex";
+  }
+  if(srcIndex == dstIndex){
+    throw "Index is Same";
   }
   // 設定値の並び替え
   var tmp = settings.rows[srcIndex];
@@ -141,6 +144,7 @@ function swapColumn(srcIndex, dstIndex){
     src.parentNode.replaceChild( dstC, src );
     dst.parentNode.replaceChild( srcC, dst );
   }
+  saveSettings();
 }
 
 /**
