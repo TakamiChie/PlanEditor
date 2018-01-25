@@ -41,7 +41,7 @@ require("electron").ipcRenderer.on("appendColumn", (e) => {
 //////////// メニュー用メソッド //////////////
 
 function menuop_append_column() {
-  showColumnDialog().then((value) => {
+  showColumnDialog(true).then((value) => {
     // 設定値更新
     settings.rows.push({name: value.name, role: value.role});
     let editorui = document.querySelector("#editorui");
@@ -116,11 +116,12 @@ function createCell({
 
 /**
  * カラム名称ダイアログを表示する
+ * @param {boolean} append ダイアログはカラムを追加するか、それとも編集するか。初期値はfalse（編集ダイアログ）
  * @param {string} name 列の名称（デフォルト値）。初期値は空文字列
  * @param {ROLE} role 列のロール（デフォルト値）。初期値はROLE.CHAPTER
  * @returns ダイアログの結果を示すPromiseオブジェクト
  */
-function showColumnDialog(name = "", role = ROLE.CHAPTER){
+function showColumnDialog(append = false, name = "", role = ROLE.CHAPTER){
   const dlg = document.querySelector("#dlg-columns");
 
   return new Promise((resolve, reject) => {
@@ -129,10 +130,31 @@ function showColumnDialog(name = "", role = ROLE.CHAPTER){
       let e = document.querySelector("#dlg-columns_columnname");
       document.querySelector("#dlg-columns_ok").disabled = e.value == "";
     }
-    document.querySelector("#dlg-columns_columnname").value = name;
+    let cn = document.querySelector("#dlg-columns_columnname");
+    let cr = document.querySelector("#dlg-columns_columnrole");
+    cn.value = name;
     refresh();
-    document.querySelector("#dlg-columns_columnname").onchange = refresh;
-    document.querySelector("#dlg-columns_columnrole").value = role;
+    cn.onchange = refresh;
+    // 編集時はそもそもロールを変更できない（編集後の値チェックが必要になるので。現状は許可しない運用とする）
+    cr.disabled = !append; 
+    cr.onchange = (e) => {
+      let ok = true;
+      let msg = "&nbsp;";
+      if(e.target.value == ROLE.CHARGE){
+        // すでに担当者列がないかどうかチェック
+        settings.rows.forEach(r => {
+          if(r.role == ROLE.CHARGE){
+            ok = false;
+            msg = "担当者列を二つ以上定義することは出来ません";
+          } ;
+        });
+      }
+      document.querySelector("#dlg-columns_ok").disabled = !ok;
+      let err = document.querySelector("#dlg-columns_errormsg");
+      err.style.visibility = ok ? "hidden" : "visible";
+      err.textContent = msg;
+  }
+    cr.value = role;
     // 表示
     dlg.showModal();
 
