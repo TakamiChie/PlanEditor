@@ -53,6 +53,7 @@ function menuop_append_column() {
         createCell({
           rowobject: rows.item(i),
           value: value.name,
+          role: value.role,
           insertIndex: -1,
           header: true
         });
@@ -92,6 +93,15 @@ function createCell({
   let cell;
   if(header){
     cell = document.createElement("th");
+    if(role == ROLE.STATIC){
+      // 編集・移動を一切行わない
+      cell.textContent = value;
+    }else{
+      // 編集・移動可能
+      let colmenu = document.querySelector("#dlg-colmenu");
+      cell.innerHTML = colmenu.innerHTML;
+      cell.querySelector(".text").textContent = value;
+    }
     if(insertIndex == -1){
       rowobject.appendChild( cell );
     }else{
@@ -100,16 +110,17 @@ function createCell({
   }else{
     cell = rowobject.insertCell(insertIndex);
   }
-  if(role == ROLE.STATIC){
+  if(role == ROLE.STATIC || header){
     // セルはラベル
     cell.contentEditable = false;
+    cell.dataset.role = role;
   }else{
     // セルは編集可能
     cell.contentEditable = true;
     cell.className = "editable";
+    cell.dataset.role = role;
+    cell.textContent = value;
   }
-  cell.dataset.role = role;
-  cell.textContent = value;
   return cell;
 }
 
@@ -273,7 +284,7 @@ function init(){
       createCell({
         rowobject: row,
         insertIndex: -1,
-        role: ROLE.STATIC,
+        role: r.role,
         value: r.name,
         header: true
       })
