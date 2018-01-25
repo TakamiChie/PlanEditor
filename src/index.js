@@ -301,9 +301,10 @@ function init(){
 function colmenu_onclick(event){
   let editorui = document.querySelector("#editorui");
   let rowobject = editorui.rows[0];
-  var colid = event.target.parentNode.parentNode.parentNode.parentNode.cellIndex;
+  let a = event.target.nodeName == "A" ? event.target : event.target.parentNode;
+  var colid = a.parentNode.parentNode.parentNode.parentNode.cellIndex;
   var toid;
-  let action = event.target.dataset.role;
+  let action = a.dataset.role;
   switch (action) {
     case "+":
       toid = colid + 1;
