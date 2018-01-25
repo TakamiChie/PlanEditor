@@ -107,10 +107,15 @@ function init(){
 document.querySelector("#appendrow").addEventListener("click", () =>{
   let editorui = document.querySelector("#editorui");
   let row = editorui.insertRow(editorui.rows.length - 1);
-  createCell({rowobject: row, value: "0"});
-  createCell({rowobject: row, role: ROLE.CHAPTER, value: "test"});
-  createCell({rowobject: row, role: ROLE.AGGREGATE, value: "0"});
-  createCell({rowobject: row, role: ROLE.TEXT});
+  settings.rows.forEach(r => {
+    createCell({
+      rowobject: row,
+      insertIndex: -1,
+      role: r.role,
+      value: "",
+    });
+  });
+  // TODO: renumber();
 });
 
 init();
