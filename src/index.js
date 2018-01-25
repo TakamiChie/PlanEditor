@@ -101,6 +101,10 @@ function createCell({
       let colmenu = document.querySelector("#dlg-colmenu");
       cell.innerHTML = colmenu.innerHTML;
       cell.querySelector(".text").textContent = value;
+      cell.querySelectorAll(".dropdown-menu > li").forEach((i) => {
+        let a = i.querySelector("a");
+        a.addEventListener("click", colmenu_onclick);
+      });
     }
     if(insertIndex == -1){
       rowobject.appendChild( cell );
@@ -131,6 +135,7 @@ function createCell({
  * @param {number} dstIndex 並び替え先の列インデックス
  */
 function swapColumn(srcIndex, dstIndex){
+  console.log(`swapColumn(${srcIndex}, ${dstIndex})`);
   if(1 > srcIndex || srcIndex >= settings.rows.length){
     throw "Range Error At srcIndex";
   }
@@ -291,6 +296,38 @@ function init(){
     });
     lastRowUpdate();
   });
+}
+
+function colmenu_onclick(event){
+  let editorui = document.querySelector("#editorui");
+  let rowobject = editorui.rows[0];
+  var colid = event.target.parentNode.parentNode.parentNode.parentNode.cellIndex;
+  var toid;
+  let action = event.target.dataset.role;
+  switch (action) {
+    case "+":
+      toid = colid + 1;
+      if(toid >= rowobject.cells.length){
+        toid = 1;
+      }
+      swapColumn(colid, toid);
+      break;
+    case "-":
+      toid = colid - 1;
+      if(toid <= 0){
+        toid = rowobject.cells.length;
+      }
+      swapColumn(colid, toid);
+      break;
+    case "x":
+      if(confirm("列を削除してもよろしいですか？")){
+        removeRow(colid);
+      }
+      break;
+    default:
+      throw "unknown method";
+      break;
+  }
 }
 
 document.querySelector("#appendrow").addEventListener("click", () =>{
