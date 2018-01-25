@@ -44,6 +44,14 @@ require("electron").ipcRenderer.on("appendColumn", (e) => {
   });
 });
 
+/**
+ * セルを追加する
+ * @param rowobject 行を示すオブジェクト
+ * @param insertindex セルを追加するインデックス。省略時-1
+ * @param role セルのロール。省略時ROLE.STATIC
+ * @param value セルの値。省略時は空文字列
+ * @param header セルはヘッダセルかどうか。省略時false
+ */
 function createCell({
   rowobject, 
   insertIndex = -1,
@@ -75,6 +83,7 @@ function createCell({
   }
   cell.dataset.role = role;
   cell.textContent = value;
+  return cell;
 }
 
 /**
