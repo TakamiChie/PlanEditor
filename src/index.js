@@ -65,8 +65,7 @@ function menuop_append_column() {
         });        
       }
     }
-    // 最終行の列数追加
-    rows[rows.length - 1].colspan = settings.rows.length + 1;
+    lastRowUpdate();
     saveSettings();
   });
 }
@@ -174,6 +173,16 @@ function showColumnDialog(append = false, name = "", role = ROLE.CHAPTER){
 }
 
 /**
+ * 最後の行（行の追加ボタン）のサイズを更新する
+ */
+function lastRowUpdate(){
+  console.log("lastRowUpdate");
+  console.log(settings.rows.length);
+  let editorui = document.querySelector("#editorui");
+  // 最終行の列数追加
+  editorui.rows[editorui.rows.length - 1].cells[0].colSpan = settings.rows.length;
+}
+/**
  *  設定値を直ちに保存する
  */
 function saveSettings(){
@@ -237,6 +246,7 @@ function init(){
         header: true
       })
     });
+    lastRowUpdate();
   });
 }
 
