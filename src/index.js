@@ -178,6 +178,23 @@ function swapColumn(srcIndex, dstIndex){
 }
 
 /**
+ * 列を削除する
+ * @param {number} index 削除する列のインデックス 
+ */
+function removeColumn(index){
+  if(1 > index || index >= settings.rows.length){
+    throw "Range Error At index";
+  }
+  settings.rows.splice(index, 1);
+  let editorui = document.querySelector("#editorui");
+  let rows = editorui.rows;
+  for (let i = 0; i < rows.length - 1; i++) {
+    rows[i].deleteCell( index );
+  }
+  saveSettings();
+}
+
+/**
  * カラム名称ダイアログを表示する
  * @param {boolean} append ダイアログはカラムを追加するか、それとも編集するか。初期値はfalse（編集ダイアログ）
  * @param {string} name 列の名称（デフォルト値）。初期値は空文字列
@@ -336,7 +353,7 @@ function colmenu_onclick(event){
       break;
     case "x":
       if(confirm("列を削除してもよろしいですか？")){
-        removeRow(colid);
+        removeColumn(colid);
       }
       break;
     default:
