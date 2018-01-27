@@ -10,6 +10,7 @@ exports.menu = [
     submenu: [
       {
         label: "ファイルを開く(&O)",
+        accelerator: "CmdOrCtrl+O",
         click: function() {
           dialog.showOpenDialog(
             BrowserWindow.getFocusedWindow(),
@@ -22,10 +23,11 @@ exports.menu = [
             (filepath) => {
               BrowserWindow.getFocusedWindow().webContents.send("fileOpen", filepath); 
             });
-          }
+        }
       },
       {
         label: "上書き保存(&S)",
+        accelerator: "CmdOrCtrl+S",
         click: function() { BrowserWindow.getFocusedWindow().webContents.send("fileSave"); }
       },
       {
