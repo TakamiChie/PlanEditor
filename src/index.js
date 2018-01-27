@@ -35,16 +35,15 @@ const ROLE = {
 let settings;
 
 require("electron").ipcRenderer.on("fileOpen", (e, arg) => {
-  console.log(arg);
-  menuop_fileOpen();
+  menuop_fileOpen(arg.shift());
 });
 
-require("electron").ipcRenderer.on("fileSave", (e) => {
-  menuop_fileSave();
+require("electron").ipcRenderer.on("fileSave", (e, arg) => {
+  menuop_fileSave(arg.shift());
 });
 
-require("electron").ipcRenderer.on("fileSaveAs", (e) => {
-  menuop_fileSaveAs();
+require("electron").ipcRenderer.on("fileClose", (e) => {
+  menuop_fileClose();
 });
 
 require("electron").ipcRenderer.on("appendColumn", (e) => {
@@ -55,9 +54,28 @@ require("electron").ipcRenderer.on("appendColumn", (e) => {
 
 /**
  * ファイルを開く
+ * @param {string} filename ファイル名
  */
-function menuop_fileOpen() {
+function menuop_fileOpen(filename) {
+  
+}
 
+/**
+ * ファイルを保存
+ * @param {string} filename ファイル名
+ */
+function menuop_fileSave(filename) {
+  
+}
+
+/**
+ * ファイルを閉じる
+ */
+function menuop_fileClose() {
+  // TODO: modifyフラグの新設
+  if(confirm("保存していない変更は失われます。よろしいですか？")){
+    fileClose();
+  }
 }
 
 function menuop_append_column() {
@@ -91,6 +109,13 @@ function menuop_append_column() {
   });
 }
 //////////// 各種メソッド //////////////
+
+function fileClose(){
+  let editorui = document.querySelector("#editorui");
+  while(editorui.rows.length > 2){
+    editorui.deleteRow(1);
+  }
+}
 
 /**
  * セルを追加する

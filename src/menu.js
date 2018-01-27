@@ -43,7 +43,13 @@ exports.menu = [
             (filepath) => {
               BrowserWindow.getFocusedWindow().webContents.send("fileSave", filepath); 
             });
-          }
+        }
+      },
+      {
+        label: "ファイルを閉じる(&C)",
+        click: function() {
+          BrowserWindow.getFocusedWindow().webContents.send("fileClose"); 
+        }
       },
       {
         type: "separator"
