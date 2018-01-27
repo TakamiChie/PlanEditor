@@ -2,6 +2,12 @@
 exports.menu = [
   {
     label: "ファイル(&F)",
+    submenu: [
+      {
+        label: "終了(&X)",
+        role: 'quit'
+      }
+    ]
   },
   {
     label: "計画(&P)",
