@@ -4,6 +4,21 @@ exports.menu = [
     label: "ファイル(&F)",
     submenu: [
       {
+        label: "ファイルを開く(&O)",
+        click: function() { BrowserWindow.getFocusedWindow().webContents.send("fileOpen"); }
+      },
+      {
+        label: "上書き保存(&S)",
+        click: function() { BrowserWindow.getFocusedWindow().webContents.send("fileSave"); }
+      },
+      {
+        label: "名前を付けて保存(&S)",
+        click: function() { BrowserWindow.getFocusedWindow().webContents.send("fileSaveAs"); }
+      },
+      {
+        type: "separator"
+      },
+      {
         label: "終了(&X)",
         role: 'quit'
       }
