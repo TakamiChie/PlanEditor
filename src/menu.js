@@ -1,11 +1,28 @@
 // ref:https://github.com/theodi/comma-chameleon/blob/master/main/menu.js
+const {dialog} = require("electron");
+const def_filters = [{
+  name: "PlanEditorファイル(*.pln)",
+  extensions: ['pln']
+}]
 exports.menu = [
   {
     label: "ファイル(&F)",
     submenu: [
       {
         label: "ファイルを開く(&O)",
-        click: function() { BrowserWindow.getFocusedWindow().webContents.send("fileOpen"); }
+        click: function() {
+          dialog.showOpenDialog(
+            BrowserWindow.getFocusedWindow(),
+            {
+              title: "ファイルを開く",
+              defaultPath: app.getPath("documents"),
+              properties: ["openFile"],
+              filters: def_filters
+            },
+            (filepath) => {
+              BrowserWindow.getFocusedWindow().webContents.send("fileOpen", filepath); 
+            });
+          }
       },
       {
         label: "上書き保存(&S)",
@@ -13,7 +30,18 @@ exports.menu = [
       },
       {
         label: "名前を付けて保存(&S)",
-        click: function() { BrowserWindow.getFocusedWindow().webContents.send("fileSaveAs"); }
+        click: function() {
+          dialog.showSaveDialog(
+            BrowserWindow.getFocusedWindow(),
+            {
+              title: "ファイルを保存",
+              defaultPath: app.getPath("documents"),
+              filters: def_filters
+            },
+            (filepath) => {
+              BrowserWindow.getFocusedWindow().webContents.send("fileSave", filepath); 
+            });
+          }
       },
       {
         type: "separator"

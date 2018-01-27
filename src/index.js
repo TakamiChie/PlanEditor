@@ -34,11 +34,31 @@ const ROLE = {
 
 let settings;
 
+require("electron").ipcRenderer.on("fileOpen", (e, arg) => {
+  console.log(arg);
+  menuop_fileOpen();
+});
+
+require("electron").ipcRenderer.on("fileSave", (e) => {
+  menuop_fileSave();
+});
+
+require("electron").ipcRenderer.on("fileSaveAs", (e) => {
+  menuop_fileSaveAs();
+});
+
 require("electron").ipcRenderer.on("appendColumn", (e) => {
   menuop_append_column();
 });
 
 //////////// メニュー用メソッド //////////////
+
+/**
+ * ファイルを開く
+ */
+function menuop_fileOpen() {
+
+}
 
 function menuop_append_column() {
   showColumnDialog(true).then((value) => {
