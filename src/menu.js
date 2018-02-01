@@ -1,9 +1,5 @@
 // ref:https://github.com/theodi/comma-chameleon/blob/master/main/menu.js
 const {dialog} = require("electron");
-const def_filters = [{
-  name: "PlanEditorファイル(*.pln)",
-  extensions: ['pln']
-}]
 exports.menu = [
   {
     label: "ファイル(&F)",
@@ -28,21 +24,20 @@ exports.menu = [
       {
         label: "上書き保存(&S)",
         accelerator: "CmdOrCtrl+S",
-        click: function() { BrowserWindow.getFocusedWindow().webContents.send("fileSave"); }
+        click: function() {
+          BrowserWindow.getFocusedWindow().webContents.send("fileSave", {
+            saveas: false,
+            path: app.getPath("documents")
+          });
+        }
       },
       {
         label: "名前を付けて保存(&S)",
         click: function() {
-          dialog.showSaveDialog(
-            BrowserWindow.getFocusedWindow(),
-            {
-              title: "ファイルを保存",
-              defaultPath: app.getPath("documents"),
-              filters: def_filters
-            },
-            (filepath) => {
-              BrowserWindow.getFocusedWindow().webContents.send("fileSave", filepath); 
-            });
+          BrowserWindow.getFocusedWindow().webContents.send("fileSave", {
+            saveas: true,
+            path: app.getPath("documents")
+          });
         }
       },
       {
