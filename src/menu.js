@@ -1,5 +1,4 @@
 // ref:https://github.com/theodi/comma-chameleon/blob/master/main/menu.js
-const {dialog} = require("electron");
 exports.menu = [
   {
     label: "ファイル(&F)",
@@ -8,17 +7,9 @@ exports.menu = [
         label: "ファイルを開く(&O)",
         accelerator: "CmdOrCtrl+O",
         click: function() {
-          dialog.showOpenDialog(
-            BrowserWindow.getFocusedWindow(),
-            {
-              title: "ファイルを開く",
-              defaultPath: app.getPath("documents"),
-              properties: ["openFile"],
-              filters: def_filters
-            },
-            (filepath) => {
-              BrowserWindow.getFocusedWindow().webContents.send("fileOpen", filepath); 
-            });
+          BrowserWindow.getFocusedWindow().webContents.send("fileOpen", {
+            directory: app.getPath("documents")
+          });
         }
       },
       {

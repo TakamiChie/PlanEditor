@@ -79,10 +79,26 @@ require("electron").ipcRenderer.on("appendColumn", (e) => {
 
 /**
  * ファイルを開く
- * @param {string} filename ファイル名
+ * @param {string} arg.directory 初期ディレクトリ名
+ * @param {string} arg.fileName ファイル名(こちらが指定されていた場合、上記の設定は無視される)
  */
-function menuop_fileOpen(filename) {
-  
+function menuop_fileOpen(args) {
+  const fs = require("fs");
+  if(args.fileName && fs.existsSync(args.fileName)){
+    fileOpen(args.fileName);
+  }else{
+    dialog.showOpenDialog(
+      BrowserWindow.getFocusedWindow(),
+      {
+        title: "ファイルを開く",
+        defaultPath: args.directory,
+        properties: ["openFile"],
+        filters: def_filters
+      },
+      (filepath) => {
+        if(filepath) fileOpen(filepath.shift()); 
+      });
+  }
 }
 
 /**
@@ -113,7 +129,7 @@ function menuop_fileSaveAs(args) {
       filters: def_filters
     },
     (filepath) => {
-      fileSave(filepath);
+      if(filepath) fileSave(filepath);
     });
 }
 
@@ -158,6 +174,68 @@ function menuop_append_column() {
   });
 }
 //////////// 各種メソッド //////////////
+
+/**
+ * ファイルを開く(ファイル名確定済み)
+ * @param {string} fileName ファイル名
+ */
+function fileOpen(fileName) {
+  const fs = require("fs");
+  const yaml = require("js-yaml");
+  fs.readFile(fileName, "utf8", (err, data) => {
+    if(err){
+      console.error(err)
+      alert("ファイル読み込みに失敗しました");
+    }else{
+      fileClose();
+      var loadData = yaml.safeLoad(data);
+      if(!loadData.filever){
+        alert("ファイルが読み込めません。ファイルが破損している可能性があります。");
+      }else if(loadData.filever.split(".").shift() == "1")
+      {
+        settings.rows = loadData.rows;
+        let editorui = document.querySelector("#editorui");
+        editorui.deleteRow(0);
+        // TODO: initと処理統合
+        var row = editorui.insertRow(editorui.rows.length - 1);
+        settings.rows.forEach(r => {
+          createCell({
+            rowobject: row,
+            insertIndex: -1,
+            role: r.role,
+            value: r.name,
+            header: true
+          })
+        });
+        lastRowUpdate();
+        let table = loadData.data;
+        console.log("table");
+        return;
+        table.forEach(r => {
+          var row = editorui.insertRow(editorui.rows.length - 1);
+          for (const item in r) {
+            if (r.hasOwnProperty(item)) {
+              const element = object[item];
+              let index = settings.row.find((i) => { return i.name == item; });
+            }
+          }
+          r.forEach(r => {
+            createCell({
+              rowobject: row,
+              insertIndex: -1,
+              role: r.role,
+              value: r.name,
+              header: true
+            })
+          });
+          });
+      }else{
+        alert("ファイルが読み込めません。ファイルが破損している可能性があります。");
+      }
+    }
+  });
+  
+}
 
 /**
  * ファイルを保存する(ファイル名確定済み)
