@@ -425,12 +425,10 @@ function showColumnDialog(append = false, name = "", role = ROLE.CHAPTER){
       let msg = "&nbsp;";
       if(e.target.value == ROLE.CHARGE){
         // すでに担当者列がないかどうかチェック
-        settings.rows.forEach(r => {
-          if(r.role == ROLE.CHARGE){
-            ok = false;
-            msg = "担当者列を二つ以上<br>定義することは出来ません";
-          } ;
-        });
+        if(settings.rows.find(r => r.role == ROLE.CHARGE) != undefined){
+          ok = false;
+          msg = "担当者列を二つ以上<br>定義することは出来ません";
+        };
       }
       document.querySelector("#dlg-columns_ok").disabled = !ok;
       let err = document.querySelector("#dlg-columns_errormsg");
