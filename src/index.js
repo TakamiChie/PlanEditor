@@ -409,32 +409,41 @@ function showColumnDialog(append = false, name = "", role = ROLE.CHAPTER){
 
   return new Promise((resolve, reject) => {
     // 初期値設定
-    var refresh = () => {
-      let e = document.querySelector("#dlg-columns_columnname");
-      document.querySelector("#dlg-columns_ok").disabled = e.value == "";
+    var judge = () => {
+      let cn = document.querySelector("#dlg-columns_columnname");
+      let cr = document.querySelector("#dlg-columns_columnrole");
+      let msg = "";
+      // 列名が空白または、すでに存在する列名でないかチェック
+      // ※ ただし、列を編集するとき、列名を変えてなければエラーを出さない
+      if(cn.value == ""){ msg = "列名を指定してください"; }
+      else if((settings.rows.find(r => r.name == cn.value) != undefined || 
+        !append && name == cn.value)){
+        if(append){
+          msg = "既存の列と<br>同じ名前の列は作成できません";        
+        }else{
+          msg = "既存の列と<br>同じ名前には変更できません";
+        }
+      }
+      // すでに担当者列がないかどうかチェック
+      if(!append || cr.value == ROLE.CHARGE){
+        if(settings.rows.find(r => r.role == ROLE.CHARGE) != undefined){
+          msg = "担当者列を二つ以上<br>定義することは出来ません";
+        };
+      }
+      let err = document.querySelector("#dlg-columns_errormsg");
+      document.querySelector("#dlg-columns_ok").disabled = msg != "";
+      err.style.visibility = msg == "" ? "hidden" : "visible";
+      err.innerHTML = msg == "" ? "&nbsp;" : msg;
+      return msg == "";
     }
     let cn = document.querySelector("#dlg-columns_columnname");
     let cr = document.querySelector("#dlg-columns_columnrole");
     cn.value = name;
-    refresh();
-    cn.onchange = refresh;
+    judge();
+    cn.onchange = judge;
     // 編集時はそもそもロールを変更できない（編集後の値チェックが必要になるので。現状は許可しない運用とする）
     cr.disabled = !append; 
-    cr.onchange = (e) => {
-      let ok = true;
-      let msg = "&nbsp;";
-      if(e.target.value == ROLE.CHARGE){
-        // すでに担当者列がないかどうかチェック
-        if(settings.rows.find(r => r.role == ROLE.CHARGE) != undefined){
-          ok = false;
-          msg = "担当者列を二つ以上<br>定義することは出来ません";
-        };
-      }
-      document.querySelector("#dlg-columns_ok").disabled = !ok;
-      let err = document.querySelector("#dlg-columns_errormsg");
-      err.style.visibility = ok ? "hidden" : "visible";
-      err.innerHTML = msg;
-  }
+    cr.onchange = judge;
     cr.value = role;
     // 表示
     dlg.showModal();
