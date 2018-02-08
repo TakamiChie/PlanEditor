@@ -195,19 +195,8 @@ function fileOpen(fileName) {
       {
         settings.rows = loadData.rows;
         let editorui = document.querySelector("#editorui");
-        editorui.deleteRow(0);
-        // TODO: initと処理統合
-        var row = editorui.insertRow(editorui.rows.length - 1);
-        settings.rows.forEach(r => {
-          createCell({
-            rowobject: row,
-            insertIndex: -1,
-            role: r.role,
-            value: r.name,
-            header: true
-          })
-        });
-        lastRowUpdate();
+        // ファイル読み込み
+        resetHeaderRow(editorui);
 
         // テーブルデータ読み込み
         let table = loadData.data;
@@ -485,6 +474,27 @@ function saveSettings(){
     } ;
   })
 }
+
+/**
+ * ヘッダ行を削除し再生成する
+ * @param {HTMLTableElement} editorui テーブルオブジェクト
+ */
+function resetHeaderRow(editorui) {
+  if(editorui.rows.length > 1){
+    editorui.deleteRow(0);
+  }
+  var row = editorui.insertRow(0);
+  settings.rows.forEach(r => {
+    createCell({
+      rowobject: row,
+      insertIndex: -1,
+      role: r.role,
+      value: r.name,
+      header: true
+    })
+  });
+  lastRowUpdate();
+}
 /**
  * 初期化
  */
@@ -528,17 +538,7 @@ function init(){
     console.log(settings);
     // テーブル初期化
     let editorui = document.querySelector("#editorui");
-    var row = editorui.insertRow(editorui.rows.length - 1);
-    settings.rows.forEach(r => {
-      createCell({
-        rowobject: row,
-        insertIndex: -1,
-        role: r.role,
-        value: r.name,
-        header: true
-      })
-    });
-    lastRowUpdate();
+    resetHeaderRow(editorui);
   });
 }
 
