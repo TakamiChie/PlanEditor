@@ -210,8 +210,10 @@ function fileOpen(fileName) {
               value: rowdata[r.name] ? rowdata[r.name] : "",
               header: false
             });
-          });            
+          });
         });
+        setOpenedFileName(fileName);
+        console.log("Open Finished");
       }else{
         alert("ファイルが読み込めません。ファイルが破損している可能性があります。");
       }
