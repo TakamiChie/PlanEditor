@@ -171,6 +171,7 @@ function menuop_append_column() {
       }
     }
     lastRowUpdate();
+    renumber();
     saveSettings();
   });
 }
@@ -216,6 +217,7 @@ function fileOpen(fileName) {
         setOpenedFileName(fileName);
         toast(`${path.basename(fileName)}を読み込みました。`);
         console.log("Open Finished");
+        renumber();
       }else{
         alert("ファイルが読み込めません。ファイルが破損している可能性があります。");
       }
@@ -496,6 +498,48 @@ function saveSettings(){
 }
 
 /**
+ * 自動採番処理を実行する
+ */
+function renumber() {
+  var start = new Date().getTime(); 
+  console.log("renumber started");
+  // 章番号配列の作成
+  var no = [];
+  var indexes = [];
+  var cprev;
+  var ccur;
+  for (let i = 0; i < settings.rows.length; i++) {
+    if(settings.rows[i].role == ROLE.CHAPTER){
+      indexes.push(i);
+      no.push(0);
+    }
+  }
+  cprev = Array.from(no);
+  ccur = Array.from(no);
+  // 採番処理の開始
+  var editorui = getEditorUI();
+  for (let i = 1; i < editorui.rows.length - 1; i++) {
+    // カレント行の章題取得
+    for (let l = 0; l < indexes.length; l++) {
+      ccur[l] = editorui.rows[i].cells[indexes[l]].textContent.trim();
+    }
+    // 前の行と変わった題名の箇所は？
+    for (let l = 0; l < indexes.length; l++) {
+      if(cprev[l] != ccur[l]){
+        no[l] += 1;
+        no.fill(1, l + 1);
+        break;
+      }
+    }
+    cprev = Array.from(ccur);
+    let num = no.join("-");
+    console.log(num + " " + ccur.join("-"));
+    editorui.rows[i].cells[0].textContent = num;
+  }
+  
+  console.log(`renumber finished ${new Date().getTime() - start} ms`);
+}
+/**
  * ヘッダ行を削除し再生成する
  * @param {HTMLTableElement} editorui テーブルオブジェクト
  */
@@ -627,7 +671,7 @@ document.querySelector("#appendrow").addEventListener("click", () =>{
       value: "",
     });
   });
-  // TODO: renumber();
+  renumber();
 });
 
 init();
