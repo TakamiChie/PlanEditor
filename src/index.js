@@ -140,6 +140,7 @@ function menuop_fileClose() {
   // TODO: modifyフラグの新設
   if(confirm("保存していない変更は失われます。よろしいですか？")){
     fileClose();
+    toast("ファイルを閉じました");
   }
 }
 
@@ -213,6 +214,7 @@ function fileOpen(fileName) {
           });
         });
         setOpenedFileName(fileName);
+        toast(`${path.basename(fileName)}を読み込みました。`);
         console.log("Open Finished");
       }else{
         alert("ファイルが読み込めません。ファイルが破損している可能性があります。");
@@ -249,7 +251,7 @@ function fileSave(fileName){
       alert("ファイル書き込みに失敗しました");
     }else{
       console.log("Save Finished");
-      alert("ファイルを保存しました");
+      toast(`ファイルを${path.basename(fileName)}に保存しました`);
       setOpenedFileName(fileName);
     }
   });
@@ -504,6 +506,27 @@ function resetHeaderRow(editorui) {
   });
   lastRowUpdate();
 }
+
+/**
+ * 数秒間だけ表示されるトーストを表示する
+ * @param {string} message メッセージ
+ * @param {string} type メッセージのタイプ。success, info, warning, dangerが指定可能
+ */
+function toast(message, type ="info") {
+  let t = document.querySelector("#toast");
+  if(t.dataset.timerid != undefined)
+  {
+    clearTimeout(t.dataset.timerid);
+    t.dataset.timerid = undefined;
+  }
+  t.textContent = message;
+  t.className = `alert alert-${type}`;
+  t.style.display = "block";
+  t.dataset.timerid = setTimeout(() => {
+    $("#toast").fadeOut();
+  }, 5000);
+}
+
 /**
  * 初期化
  */
