@@ -335,6 +335,7 @@ function createCell({
     // セルは編集可能
     cell.contentEditable = true;
     cell.className = "editable";
+    cell.addEventListener("blur", cells_onblur);
     cell.dataset.role = role;
     cell.textContent = value;
   }
@@ -658,6 +659,17 @@ function colmenu_onclick(event){
       throw "unknown method";
       break;
   }
+}
+
+/**
+ * セルの変更が行われた際に呼び出されるイベントハンドラ
+ * @param {EventTarget} e イベント発生源を示すEventTarget
+ */
+function cells_onblur(e){
+  if(e.target.dataset.role == ROLE.CHAPTER){
+    renumber();
+  }
+
 }
 
 document.querySelector("#appendrow").addEventListener("click", () =>{
