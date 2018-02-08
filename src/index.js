@@ -277,6 +277,15 @@ function setOpenedFileName(newFileName){
     document.title = `${WINDOWTITLE}`;
   }
 }
+
+/**
+ * エディタUIを取得
+ * @return エディタUIを示すHTMLTableElement
+ */
+function getEditorUI(){
+  return document.querySelector("#editorui");
+}
+
 /**
  * セルを追加する
  * @param {HTMLRowObject} rowobject 行を示すオブジェクト
