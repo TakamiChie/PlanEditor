@@ -270,7 +270,7 @@ function setOpenedFileName(newFileName){
   if(openedFileName != ""){
     document.title = `${WINDOWTITLE} - ${path.basename(openedFileName)}`;
   }else{
-    document.title = `${WINDOWTITLE} - ${path.basename(openedFileName)}`;
+    document.title = `${WINDOWTITLE}`;
   }
 }
 /**
