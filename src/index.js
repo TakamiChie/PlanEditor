@@ -534,7 +534,6 @@ function renumber() {
     }
     cprev = Array.from(ccur);
     let num = no.join("-");
-    console.log(num + " " + ccur.join("-"));
     editorui.rows[i].cells[0].textContent = num;
   }
   
