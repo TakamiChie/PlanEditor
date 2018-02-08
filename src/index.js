@@ -1,4 +1,12 @@
 /**
+ * セーブファイルのファイルバージョン
+ */
+const FILEVERSION = "1.0.0";
+/**
+ * ウィンドウのタイトル
+ */
+const WINDOWTITLE = "PlanEditor";
+/**
  * セルの役割を示す列挙体
  */
 const ROLE = {
@@ -31,14 +39,109 @@ const ROLE = {
    */
   STATIC: "STATIC"
 }
+/**
+ * ファイルフィルタ
+ */
+const def_filters = [{
+  name: "PlanEditorファイル(*.pln)",
+  extensions: ['pln']
+}]
+const electron = require('electron');
+const remote = electron.remote;
+const BrowserWindow = remote.BrowserWindow;
+const dialog = remote.dialog;
+const path = require('path');
 
 let settings;
+let openedFileName;
+
+require("electron").ipcRenderer.on("fileOpen", (e, arg) => {
+  menuop_fileOpen(arg);
+});
+
+require("electron").ipcRenderer.on("fileSave", (e, args) => {
+  if(args.saveas){
+    menuop_fileSaveAs(args);
+  }else{
+    menuop_fileSave(args);
+  }
+});
+
+require("electron").ipcRenderer.on("fileClose", (e) => {
+  menuop_fileClose();
+});
 
 require("electron").ipcRenderer.on("appendColumn", (e) => {
   menuop_append_column();
 });
 
 //////////// メニュー用メソッド //////////////
+
+/**
+ * ファイルを開く
+ * @param {string} arg.directory 初期ディレクトリ名
+ * @param {string} arg.fileName ファイル名(こちらが指定されていた場合、上記の設定は無視される)
+ */
+function menuop_fileOpen(args) {
+  const fs = require("fs");
+  if(args.fileName && fs.existsSync(args.fileName)){
+    fileOpen(args.fileName);
+  }else{
+    dialog.showOpenDialog(
+      BrowserWindow.getFocusedWindow(),
+      {
+        title: "ファイルを開く",
+        defaultPath: args.directory,
+        properties: ["openFile"],
+        filters: def_filters
+      },
+      (filepath) => {
+        if(filepath) fileOpen(filepath.shift()); 
+      });
+  }
+}
+
+/**
+ * ファイルを上書き保存
+ * @param {string} args.path 初期ディレクトリ名
+ * @param {boolean} args.saveas 項目は「名前をつけて保存」である
+ */
+function menuop_fileSave(args) {
+  const fs = require("fs");
+  if(fs.existsSync(openedFileName)){
+    fileSave(openedFileName);
+  }else{
+    menuop_fileSaveAs(args);
+  }
+}
+
+/**
+ * ファイルを名前をつけて保存
+ * @param {string} args.path 初期ディレクトリ名
+ * @param {boolean} args.saveas 項目は「名前をつけて保存」である
+ */
+function menuop_fileSaveAs(args) {
+  dialog.showSaveDialog(
+    BrowserWindow.getFocusedWindow(),
+    {
+      title: "ファイルを保存",
+      defaultPath: args.path,
+      filters: def_filters
+    },
+    (filepath) => {
+      if(filepath) fileSave(filepath);
+    });
+}
+
+/**
+ * ファイルを閉じる
+ */
+function menuop_fileClose() {
+  // TODO: modifyフラグの新設
+  if(confirm("保存していない変更は失われます。よろしいですか？")){
+    fileClose();
+  }
+}
 
 function menuop_append_column() {
   showColumnDialog(true).then((value) => {
@@ -72,6 +175,115 @@ function menuop_append_column() {
 }
 //////////// 各種メソッド //////////////
 
+/**
+ * ファイルを開く(ファイル名確定済み)
+ * @param {string} fileName ファイル名
+ */
+function fileOpen(fileName) {
+  const fs = require("fs");
+  const yaml = require("js-yaml");
+  fs.readFile(fileName, "utf8", (err, data) => {
+    if(err){
+      console.error(err)
+      alert("ファイル読み込みに失敗しました");
+    }else{
+      fileClose();
+      var loadData = yaml.safeLoad(data);
+      if(!loadData.filever){
+        alert("ファイルが読み込めません。ファイルが破損している可能性があります。");
+      }else if(loadData.filever.split(".").shift() == "1")
+      {
+        settings.rows = loadData.rows;
+        let editorui = document.querySelector("#editorui");
+        editorui.deleteRow(0);
+        // TODO: initと処理統合
+        var row = editorui.insertRow(editorui.rows.length - 1);
+        settings.rows.forEach(r => {
+          createCell({
+            rowobject: row,
+            insertIndex: -1,
+            role: r.role,
+            value: r.name,
+            header: true
+          })
+        });
+        lastRowUpdate();
+
+        // テーブルデータ読み込み
+        let table = loadData.data;
+        table.forEach(rowdata => {
+          var row = editorui.insertRow(editorui.rows.length - 1);
+          settings.rows.forEach(r => {
+            createCell({
+              rowobject: row,
+              insertIndex: -1,
+              role: r.role,
+              value: rowdata[r.name] ? rowdata[r.name] : "",
+              header: false
+            });
+          });            
+        });
+      }else{
+        alert("ファイルが読み込めません。ファイルが破損している可能性があります。");
+      }
+    }
+  });
+  
+}
+
+/**
+ * ファイルを保存する(ファイル名確定済み)
+ * @param {string} fileName ファイル名
+ */
+function fileSave(fileName){
+  var serialize = {};
+  let editorui = document.querySelector("#editorui");
+  serialize["filever"] = FILEVERSION;
+  serialize["rows"] = settings.rows;
+  var rows = editorui.rows;
+  var tabledata = [];
+  for (var i = 1; i < rows.length - 1; i++) {
+    var rowdata = {};
+    for (let l = 0; l < rows[i].cells.length; l++) {
+      rowdata[settings.rows[l].name] = rows[i].cells[l].textContent;
+    }
+    tabledata.push(rowdata);
+  }
+  serialize["data"] = tabledata;
+  const fs = require("fs");
+  const yaml = require("js-yaml");
+  fs.writeFile(fileName, yaml.safeDump(serialize), "utf8", (err) => {
+    if(err){
+      console.log(err);
+      alert("ファイル書き込みに失敗しました");
+    }else{
+      console.log("Save Finished");
+      alert("ファイルを保存しました");
+      setOpenedFileName(fileName);
+    }
+  });
+}
+
+function fileClose(){
+  let editorui = document.querySelector("#editorui");
+  while(editorui.rows.length > 2){
+    editorui.deleteRow(1);
+  }
+  setOpenedFileName("");
+}
+
+/**
+ * 開いているファイル名を変更する
+ * @param {string} newFileName 新しいファイル名
+ */
+function setOpenedFileName(newFileName){
+  openedFileName = newFileName;
+  if(openedFileName != ""){
+    document.title = `${WINDOWTITLE} - ${path.basename(openedFileName)}`;
+  }else{
+    document.title = `${WINDOWTITLE} - ${path.basename(openedFileName)}`;
+  }
+}
 /**
  * セルを追加する
  * @param {HTMLRowObject} rowobject 行を示すオブジェクト
@@ -282,7 +494,7 @@ function init(){
     // TODO: デフォルト値を外部化
     rows : [
       {
-        name: "No",
+        name: "項番",
         role: ROLE.STATIC
       },{
         name: "章",
@@ -296,6 +508,7 @@ function init(){
       }
     ]
   }
+  document.title = WINDOWTITLE;
   // 設定値読み込み
   const storage = require("electron-json-storage");
 
