@@ -208,27 +208,21 @@ function fileOpen(fileName) {
           })
         });
         lastRowUpdate();
+
+        // テーブルデータ読み込み
         let table = loadData.data;
-        console.log("table");
-        return;
-        table.forEach(r => {
+        table.forEach(rowdata => {
           var row = editorui.insertRow(editorui.rows.length - 1);
-          for (const item in r) {
-            if (r.hasOwnProperty(item)) {
-              const element = object[item];
-              let index = settings.row.find((i) => { return i.name == item; });
-            }
-          }
-          r.forEach(r => {
+          settings.rows.forEach(r => {
             createCell({
               rowobject: row,
               insertIndex: -1,
               role: r.role,
-              value: r.name,
-              header: true
-            })
-          });
-          });
+              value: rowdata[r.name] ? rowdata[r.name] : "",
+              header: false
+            });
+          });            
+        });
       }else{
         alert("ファイルが読み込めません。ファイルが破損している可能性があります。");
       }
