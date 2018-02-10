@@ -351,8 +351,8 @@ function createCell({
 function resetEventHandler(cell, eventHandler) {
   cell.querySelectorAll(".dropdown-menu > li").forEach((i) => {
     let a = i.querySelector("a");
-    a.removeEventListener("click", colmenu_onclick);
-    a.addEventListener("click", colmenu_onclick);
+    a.removeEventListener("click", eventHandler);
+    a.addEventListener("click", eventHandler);
   });
 }
 
