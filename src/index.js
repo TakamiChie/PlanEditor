@@ -364,6 +364,28 @@ function resetEventHandler(cell, eventHandler) {
 }
 
 /**
+ * 行を並び替える
+ * @param {number} srcIndex 並び替え元の行インデックス
+ * @param {number} dstIndex 並び替え先の行インデックス
+ */
+function swapRow(srcIndex, dstIndex){
+  throw "Not Implemented";
+}
+
+/**
+ * 行を削除する
+ * @param {number} index 削除する行の行インデックス
+ */
+function removeRow(index){
+  let editorui = getEditorUI();
+  if(1 > index || index >= editorui.rows.length - 1){
+    throw "Range Error At index";
+  }
+  getEditorUI().deleteRow(index);
+  renumber();
+}
+
+/**
  * 列を並び替える
  * @param {number} srcIndex 並び替え元の列インデックス
  * @param {number} dstIndex 並び替え先の列インデックス
