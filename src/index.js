@@ -369,7 +369,27 @@ function resetEventHandler(cell, eventHandler) {
  * @param {number} dstIndex 並び替え先の行インデックス
  */
 function swapRow(srcIndex, dstIndex){
-  throw "Not Implemented";
+  console.log(`swapRow(${srcIndex}, ${dstIndex})`);
+  let editorui = getEditorUI();
+  if(1 > srcIndex || srcIndex >= editorui.rows.length - 1){
+    throw "Range Error At srcIndex";
+  }
+  if(1 > dstIndex || dstIndex >= editorui.rows.length - 1){
+    throw "Range Error At dstIndex";
+  }
+  if(srcIndex == dstIndex){
+    throw "Index is Same";
+  }
+  // セルの並び替え
+  let rows = editorui.rows;
+  var src = rows[srcIndex];
+  var dst = rows[dstIndex];
+  var srcC = src.cloneNode(true);
+  var dstC = dst.cloneNode(true);
+  src.parentNode.replaceChild( dstC, src );
+  dst.parentNode.replaceChild( srcC, dst );
+  resetEventHandler(srcC.cells[0], rowmenu_onclick);
+  resetEventHandler(dstC.cells[0], rowmenu_onclick);
 }
 
 /**
@@ -669,17 +689,17 @@ function rowmenu_onclick(event){
   switch (action) {
     case "+":
       toid = rowid + 1;
-      if(toid >= editorui.rows.length - 2){
+      if(toid >= editorui.rows.length - 1){
         toid = 1;
       }
-      swapRow(colid, toid);
+      swapRow(rowid, toid);
       break;
     case "-":
-      toid = colid - 1;
+      toid = rowid - 1;
       if(toid <= 0){
-        toid = editorui.rows.length - 1;
+        toid = editorui.rows.length - 2;
       }
-      swapRow(colid, toid);
+      swapRow(rowid, toid);
       break;
     case "x":
       if(confirm("行を削除してもよろしいですか？")){
