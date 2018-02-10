@@ -327,6 +327,13 @@ function createCell({
   }else{
     cell = rowobject.insertCell(insertIndex);
   }
+  if(role == ROLE.STATIC && !header){
+    // セルは項番セル・編集・移動可能
+    let rowmenu = document.querySelector("#dlg-rowmenu");
+    cell.innerHTML = rowmenu.innerHTML;
+    cell.querySelector(".text").textContent = value;
+    resetEventHandler(cell, rowmenu_onclick);
+  }
   if(role == ROLE.STATIC || header){
     // セルはラベル
     cell.contentEditable = false;
@@ -534,7 +541,7 @@ function renumber() {
     }
     cprev = Array.from(ccur);
     let num = no.join("-");
-    editorui.rows[i].cells[0].textContent = num;
+    editorui.rows[i].cells[0].querySelector(".text").textContent = num;
   }
   
   console.log(`renumber finished ${new Date().getTime() - start} ms`);
@@ -627,6 +634,46 @@ function init(){
   });
 }
 
+/**
+ * 行ヘッダメニューのイベントハンドラ
+ * @param {EventArgs} event
+ */
+function rowmenu_onclick(event){
+  let editorui = getEditorUI();
+  let a = event.target.nodeName == "A" ? event.target : event.target.parentNode;
+  var rowid = a.parentNode.parentNode.parentNode.parentNode.parentNode.rowIndex;
+  var toid;
+  let action = a.dataset.role;
+  switch (action) {
+    case "+":
+      toid = rowid + 1;
+      if(toid >= editorui.rows.length - 2){
+        toid = 1;
+      }
+      swapRow(colid, toid);
+      break;
+    case "-":
+      toid = colid - 1;
+      if(toid <= 0){
+        toid = editorui.rows.length - 1;
+      }
+      swapRow(colid, toid);
+      break;
+    case "x":
+      if(confirm("行を削除してもよろしいですか？")){
+        removeRow(rowid);
+      }
+      break;
+    default:
+      throw "unknown method";
+      break;
+  }
+}
+
+/**
+ * 列ヘッダメニューのイベントハンドラ
+ * @param {EventArgs} event イベント発生時のオブジェクトを示す
+ */
 function colmenu_onclick(event){
   let editorui = document.querySelector("#editorui");
   let rowobject = editorui.rows[0];
