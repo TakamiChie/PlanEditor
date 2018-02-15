@@ -172,6 +172,7 @@ function menuop_append_column() {
     }
     lastRowUpdate();
     renumber();
+    aggregates();
     saveSettings();
   });
 }
@@ -218,6 +219,7 @@ function fileOpen(fileName) {
         toast(`${path.basename(fileName)}を読み込みました。`);
         console.log("Open Finished");
         renumber();
+        aggregates();
       }else{
         alert("ファイルが読み込めません。ファイルが破損している可能性があります。");
       }
@@ -403,6 +405,7 @@ function removeRow(index){
   }
   getEditorUI().deleteRow(index);
   renumber();
+  aggregates();
 }
 
 /**
@@ -588,6 +591,14 @@ function renumber() {
   
   console.log(`renumber finished ${new Date().getTime() - start} ms`);
 }
+
+/**
+ * 集計行の再集計処理を行う
+ */
+function aggregates() {
+    
+}
+
 /**
  * ヘッダ行を削除し再生成する
  * @param {HTMLTableElement} editorui テーブルオブジェクト
