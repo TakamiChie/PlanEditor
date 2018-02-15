@@ -148,7 +148,7 @@ function menuop_append_column() {
   showColumnDialog(true).then((value) => {
     // 設定値更新
     settings.rows.push({name: value.name, role: value.role});
-    let editorui = document.querySelector("#editorui");
+    let editorui = getEditorUI();
     let rows = editorui.rows;
     // セルの追加
     for (let i = 0; i < rows.length - 1; i++) {
@@ -196,7 +196,7 @@ function fileOpen(fileName) {
       }else if(loadData.filever.split(".").shift() == "1")
       {
         settings.rows = loadData.rows;
-        let editorui = document.querySelector("#editorui");
+        let editorui = getEditorUI();
         // ファイル読み込み
         resetHeaderRow(editorui);
 
@@ -232,7 +232,7 @@ function fileOpen(fileName) {
  */
 function fileSave(fileName){
   var serialize = {};
-  let editorui = document.querySelector("#editorui");
+  let editorui = getEditorUI();
   serialize["filever"] = FILEVERSION;
   serialize["rows"] = settings.rows;
   var rows = editorui.rows;
@@ -260,7 +260,7 @@ function fileSave(fileName){
 }
 
 function fileClose(){
-  let editorui = document.querySelector("#editorui");
+  let editorui = getEditorUI();
   while(editorui.rows.length > 2){
     editorui.deleteRow(1);
   }
@@ -426,7 +426,7 @@ function swapColumn(srcIndex, dstIndex){
   settings.rows[srcIndex] = settings.rows[dstIndex];
   settings.rows[dstIndex] = tmp;
   // セルの並び替え
-  let editorui = document.querySelector("#editorui");
+  let editorui = getEditorUI();
   let rows = editorui.rows;
   for (let i = 0; i < rows.length - 1; i++) {
     var src = rows[i].cells[srcIndex];
@@ -452,7 +452,7 @@ function removeColumn(index){
     throw "Range Error At index";
   }
   settings.rows.splice(index, 1);
-  let editorui = document.querySelector("#editorui");
+  let editorui = getEditorUI();
   let rows = editorui.rows;
   for (let i = 0; i < rows.length - 1; i++) {
     rows[i].deleteCell( index );
@@ -530,7 +530,7 @@ function showColumnDialog(append = false, name = "", role = ROLE.CHAPTER){
  * 最後の行（行の追加ボタン）のサイズを更新する
  */
 function lastRowUpdate(){
-  let editorui = document.querySelector("#editorui");
+  let editorui = getEditorUI();
   // 最終行の列数追加
   editorui.rows[editorui.rows.length - 1].cells[0].colSpan = settings.rows.length;
 }
@@ -671,7 +671,7 @@ function init(){
   }).then(() => {
     console.log(settings);
     // テーブル初期化
-    let editorui = document.querySelector("#editorui");
+    let editorui = getEditorUI();
     resetHeaderRow(editorui);
   });
 }
@@ -717,7 +717,7 @@ function rowmenu_onclick(event){
  * @param {EventArgs} event イベント発生時のオブジェクトを示す
  */
 function colmenu_onclick(event){
-  let editorui = document.querySelector("#editorui");
+  let editorui = getEditorUI();
   let rowobject = editorui.rows[0];
   let a = event.target.nodeName == "A" ? event.target : event.target.parentNode;
   var colid = a.parentNode.parentNode.parentNode.parentNode.cellIndex;
@@ -761,7 +761,7 @@ function cells_onblur(e){
 }
 
 document.querySelector("#appendrow").addEventListener("click", () =>{
-  let editorui = document.querySelector("#editorui");
+  let editorui = getEditorUI();
   let row = editorui.insertRow(editorui.rows.length - 1);
   settings.rows.forEach(r => {
     createCell({
