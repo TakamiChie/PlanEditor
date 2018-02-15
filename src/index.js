@@ -596,7 +596,47 @@ function renumber() {
  * 集計行の再集計処理を行う
  */
 function aggregates() {
-    
+  var start = new Date().getTime(); 
+  console.log("aggregate started");
+  // 集計配列の作成
+  var aggregate = [];
+  var indexes = [];
+  for (let i = 0; i < settings.rows.length; i++) {
+    if(settings.rows[i].role == ROLE.AGGREGATE){
+      aggregate.push({TOTAL:0});
+      indexes.push(i);
+    }
+  }
+  // 集計処理の開始
+  var editorui = getEditorUI();
+  for (let i = 1; i < editorui.rows.length - 1; i++) {
+    for (let l = 0; l < indexes.length; l++) {
+      let c = parseInt(editorui.rows[i].cells[indexes[l]].textContent);
+      aggregate[l].TOTAL += isNaN(c) ? 0 : c;
+    }
+  }
+
+  console.log(aggregate);
+  var aggregates_fields = document.querySelector("#aggregates_fields");
+  aggregates_fields.innerHTML = "";
+  aggregate.forEach((a, i) => {
+    let section = document.createElement("section");
+    let title = document.createElement("h2");
+    let dl = document.createElement("dl");
+    let dt = document.createElement("dt");
+    let dd = document.createElement("dd");
+    section.appendChild(title);
+    section.appendChild(dl);
+    title.textContent = settings.rows[indexes[i]].name;
+    dt.textContent = "合計";
+    dd.textContent = a.TOTAL;
+    dd.className = "label label-primary";
+    dl.appendChild(dt);
+    dl.appendChild(dd);
+    aggregates_fields.appendChild(section);
+  });
+
+  console.log(`aggregate finished ${new Date().getTime() - start} ms`);
 }
 
 /**
@@ -767,6 +807,9 @@ function colmenu_onclick(event){
 function cells_onblur(e){
   if(e.target.dataset.role == ROLE.CHAPTER){
     renumber();
+  }
+  if(e.target.dataset.role == ROLE.AGGREGATE){
+    aggregates();
   }
 
 }
