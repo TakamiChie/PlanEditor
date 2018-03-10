@@ -601,18 +601,29 @@ function aggregates() {
   // 集計配列の作成
   var aggregate = [];
   var indexes = [];
+  var charge = undefined;
   for (let i = 0; i < settings.rows.length; i++) {
     if(settings.rows[i].role == ROLE.AGGREGATE){
       aggregate.push({TOTAL:0});
       indexes.push(i);
+    }
+    if(settings.rows[i].role == ROLE.CHARGE){
+      charge = i;
     }
   }
   // 集計処理の開始
   var editorui = getEditorUI();
   for (let i = 1; i < editorui.rows.length - 1; i++) {
     for (let l = 0; l < indexes.length; l++) {
-      aggregate[l].TOTAL += isNaN(c) ? 0 : c;
       let c = parseFloat(editorui.rows[i].cells[indexes[l]].textContent);
+      cn = isNaN(c) ? 0 : c;
+      aggregate[l].TOTAL += cn;
+      if(charge != undefined){
+        if(aggregate[l]["e"+editorui.rows[i].cells[charge].textContent] == undefined){
+          aggregate[l]["e"+editorui.rows[i].cells[charge].textContent] = 0;
+        }
+        aggregate[l]["e"+editorui.rows[i].cells[charge].textContent] += cn;
+      }
     }
   }
 
@@ -633,6 +644,19 @@ function aggregates() {
     dd.className = "label label-primary";
     dl.appendChild(dt);
     dl.appendChild(dd);
+    // 担当者別集計を列挙
+    for (const key in a) {
+      if (a.hasOwnProperty(key) && key.charAt(0) == "e") {
+        const element = a[key];
+        let dt = document.createElement("dt");
+        let dd = document.createElement("dd");
+        dt.textContent = key.substring(1);
+        dd.textContent = a[key];
+        dl.appendChild(dt);
+        dl.appendChild(dd);
+        dd.className = "label label-info";
+      }
+    }
     aggregates_fields.appendChild(section);
   });
 
