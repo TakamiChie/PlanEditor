@@ -611,8 +611,8 @@ function aggregates() {
   var editorui = getEditorUI();
   for (let i = 1; i < editorui.rows.length - 1; i++) {
     for (let l = 0; l < indexes.length; l++) {
-      let c = parseInt(editorui.rows[i].cells[indexes[l]].textContent);
       aggregate[l].TOTAL += isNaN(c) ? 0 : c;
+      let c = parseFloat(editorui.rows[i].cells[indexes[l]].textContent);
     }
   }
 
