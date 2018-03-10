@@ -4,6 +4,15 @@
   box-sizing: content-box !important;
 }
 
+html{
+  height: 100vh;
+}
+
+body{
+  height: 100%;
+  overflow: hidden;
+}
+
 div#toast {
   top: 0;
   width: 80%;
@@ -17,6 +26,19 @@ div#container {
   margin: 16px;
 }
 
+div#editorui {
+  height: 100%;
+  input {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    margin: 0;
+    padding: 0;
+    outline: 0;
+    float: left;
+    background: transparent;
+  }
+}
 table#editorui {
   border: 3px solid black;
   background-color: transparent;

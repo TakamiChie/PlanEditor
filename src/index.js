@@ -55,6 +55,7 @@ const path = require('path');
 let settings;
 let openedFileName;
 var grid;
+var tabledata = [];
 
 require("electron").ipcRenderer.on("fileOpen", (e, arg) => {
   menuop_fileOpen(arg);
@@ -352,6 +353,30 @@ function createCell({
   return cell;
 }
 
+/**
+ * Slickgridを作成する
+ * @param {*} columns カラムデータを格納した配列
+ */
+function createSlickGrid(columns) {
+  let options = {
+    editable: true,
+    enableAddRow: true,
+    enableCellNavigation: true,
+    asyncEditorLoading: false,
+    autoEdit: true,
+    enableColumnReorder: false
+  }
+  grid = new Slick.Grid("#editorui", tabledata, columns, options);
+  grid.getSelectionModel(new Slick.CellSelectionModel());
+  grid.onAddNewRow.subscribe((e, args) => {
+    var item = args.item;
+    grid.invalidateRow(tabledata.length);
+    tabledata.push(item);
+    grid.updateRowCount();
+    grid.render();
+  });
+  return grid;
+}
 /**
  * セルのメニューにイベントハンドラを再セットする
  * @description swapColumn実施後、イベントハンドラが消えることがあるため再設定する
@@ -666,14 +691,15 @@ function aggregates() {
 
 /**
  * ヘッダ行を削除し再生成する
- * @param {HTMLTableElement} editorui テーブルオブジェクト
+ * @param {HTMLElement} editorui テーブルオブジェクト
  */
 function resetHeaderRow(editorui) {
   var columns = [];
   settings.rows.forEach((r, i) => {
     var column = {}; 
-    column.id = "item"+i;
+    column.id = r.name;
     column.name = r.name;
+    column.field = r.name;
     switch (r.role) {
       case ROLE.STATIC:
         column.focusable = false;
@@ -711,15 +737,7 @@ function resetHeaderRow(editorui) {
   if(grid != undefined){
     grid.setColumn(columns);
   }else{
-    let options = {
-      editable: true,
-      enableAddRow: true,
-      enableCellNavigation: true,
-      asyncEditorLoading: false,
-      autoEdit: false,
-      enableColumnReorder: false
-    }
-    grid = new Slick.Grid("#editorui", [], columns, options);
+    grid = createSlickGrid(columns); 
   }
 }
 
@@ -877,6 +895,18 @@ function cells_onblur(e){
 
 }
 
+function resizeObject() {
+  let hsize = $(window).height();
+  let fsize = $("footer").height() * 2;
+  $("#container").css("height", (hsize - fsize) + "px");
+}
+$(document).ready(() => {
+  resizeObject();
+});
+$(window).resize(() => {
+  resizeObject();
+});
+  
 document.querySelector("#appendrow").addEventListener("click", () =>{
   let editorui = getEditorUI();
   let row = editorui.insertRow(editorui.rows.length - 1);
