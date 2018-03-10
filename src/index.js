@@ -148,7 +148,7 @@ function menuop_append_column() {
   showColumnDialog(true).then((value) => {
     // 設定値更新
     settings.rows.push({name: value.name, role: value.role});
-    let editorui = document.querySelector("#editorui");
+    let editorui = getEditorUI();
     let rows = editorui.rows;
     // セルの追加
     for (let i = 0; i < rows.length - 1; i++) {
@@ -172,6 +172,7 @@ function menuop_append_column() {
     }
     lastRowUpdate();
     renumber();
+    aggregates();
     saveSettings();
   });
 }
@@ -196,7 +197,7 @@ function fileOpen(fileName) {
       }else if(loadData.filever.split(".").shift() == "1")
       {
         settings.rows = loadData.rows;
-        let editorui = document.querySelector("#editorui");
+        let editorui = getEditorUI();
         // ファイル読み込み
         resetHeaderRow(editorui);
 
@@ -218,6 +219,7 @@ function fileOpen(fileName) {
         toast(`${path.basename(fileName)}を読み込みました。`);
         console.log("Open Finished");
         renumber();
+        aggregates();
       }else{
         alert("ファイルが読み込めません。ファイルが破損している可能性があります。");
       }
@@ -232,7 +234,7 @@ function fileOpen(fileName) {
  */
 function fileSave(fileName){
   var serialize = {};
-  let editorui = document.querySelector("#editorui");
+  let editorui = getEditorUI();
   serialize["filever"] = FILEVERSION;
   serialize["rows"] = settings.rows;
   var rows = editorui.rows;
@@ -260,7 +262,7 @@ function fileSave(fileName){
 }
 
 function fileClose(){
-  let editorui = document.querySelector("#editorui");
+  let editorui = getEditorUI();
   while(editorui.rows.length > 2){
     editorui.deleteRow(1);
   }
@@ -403,6 +405,7 @@ function removeRow(index){
   }
   getEditorUI().deleteRow(index);
   renumber();
+  aggregates();
 }
 
 /**
@@ -426,7 +429,7 @@ function swapColumn(srcIndex, dstIndex){
   settings.rows[srcIndex] = settings.rows[dstIndex];
   settings.rows[dstIndex] = tmp;
   // セルの並び替え
-  let editorui = document.querySelector("#editorui");
+  let editorui = getEditorUI();
   let rows = editorui.rows;
   for (let i = 0; i < rows.length - 1; i++) {
     var src = rows[i].cells[srcIndex];
@@ -452,7 +455,7 @@ function removeColumn(index){
     throw "Range Error At index";
   }
   settings.rows.splice(index, 1);
-  let editorui = document.querySelector("#editorui");
+  let editorui = getEditorUI();
   let rows = editorui.rows;
   for (let i = 0; i < rows.length - 1; i++) {
     rows[i].deleteCell( index );
@@ -530,7 +533,7 @@ function showColumnDialog(append = false, name = "", role = ROLE.CHAPTER){
  * 最後の行（行の追加ボタン）のサイズを更新する
  */
 function lastRowUpdate(){
-  let editorui = document.querySelector("#editorui");
+  let editorui = getEditorUI();
   // 最終行の列数追加
   editorui.rows[editorui.rows.length - 1].cells[0].colSpan = settings.rows.length;
 }
@@ -588,6 +591,78 @@ function renumber() {
   
   console.log(`renumber finished ${new Date().getTime() - start} ms`);
 }
+
+/**
+ * 集計行の再集計処理を行う
+ */
+function aggregates() {
+  var start = new Date().getTime(); 
+  console.log("aggregate started");
+  // 集計配列の作成
+  var aggregate = [];
+  var indexes = [];
+  var charge = undefined;
+  for (let i = 0; i < settings.rows.length; i++) {
+    if(settings.rows[i].role == ROLE.AGGREGATE){
+      aggregate.push({TOTAL:0});
+      indexes.push(i);
+    }
+    if(settings.rows[i].role == ROLE.CHARGE){
+      charge = i;
+    }
+  }
+  // 集計処理の開始
+  var editorui = getEditorUI();
+  for (let i = 1; i < editorui.rows.length - 1; i++) {
+    for (let l = 0; l < indexes.length; l++) {
+      let c = parseFloat(editorui.rows[i].cells[indexes[l]].textContent);
+      cn = isNaN(c) ? 0 : c;
+      aggregate[l].TOTAL += cn;
+      if(charge != undefined){
+        if(aggregate[l]["e"+editorui.rows[i].cells[charge].textContent] == undefined){
+          aggregate[l]["e"+editorui.rows[i].cells[charge].textContent] = 0;
+        }
+        aggregate[l]["e"+editorui.rows[i].cells[charge].textContent] += cn;
+      }
+    }
+  }
+
+  console.log(aggregate);
+  var aggregates_fields = document.querySelector("#aggregates_fields");
+  aggregates_fields.innerHTML = "";
+  aggregate.forEach((a, i) => {
+    let section = document.createElement("section");
+    let title = document.createElement("h2");
+    let dl = document.createElement("dl");
+    let dt = document.createElement("dt");
+    let dd = document.createElement("dd");
+    section.appendChild(title);
+    section.appendChild(dl);
+    title.textContent = settings.rows[indexes[i]].name;
+    dt.textContent = "合計";
+    dd.textContent = a.TOTAL;
+    dd.className = "label label-primary";
+    dl.appendChild(dt);
+    dl.appendChild(dd);
+    // 担当者別集計を列挙
+    for (const key in a) {
+      if (a.hasOwnProperty(key) && key.charAt(0) == "e") {
+        const element = a[key];
+        let dt = document.createElement("dt");
+        let dd = document.createElement("dd");
+        dt.textContent = key.substring(1);
+        dd.textContent = a[key];
+        dl.appendChild(dt);
+        dl.appendChild(dd);
+        dd.className = "label label-info";
+      }
+    }
+    aggregates_fields.appendChild(section);
+  });
+
+  console.log(`aggregate finished ${new Date().getTime() - start} ms`);
+}
+
 /**
  * ヘッダ行を削除し再生成する
  * @param {HTMLTableElement} editorui テーブルオブジェクト
@@ -671,7 +746,7 @@ function init(){
   }).then(() => {
     console.log(settings);
     // テーブル初期化
-    let editorui = document.querySelector("#editorui");
+    let editorui = getEditorUI();
     resetHeaderRow(editorui);
   });
 }
@@ -717,7 +792,7 @@ function rowmenu_onclick(event){
  * @param {EventArgs} event イベント発生時のオブジェクトを示す
  */
 function colmenu_onclick(event){
-  let editorui = document.querySelector("#editorui");
+  let editorui = getEditorUI();
   let rowobject = editorui.rows[0];
   let a = event.target.nodeName == "A" ? event.target : event.target.parentNode;
   var colid = a.parentNode.parentNode.parentNode.parentNode.cellIndex;
@@ -757,11 +832,14 @@ function cells_onblur(e){
   if(e.target.dataset.role == ROLE.CHAPTER){
     renumber();
   }
+  if(e.target.dataset.role == ROLE.AGGREGATE){
+    aggregates();
+  }
 
 }
 
 document.querySelector("#appendrow").addEventListener("click", () =>{
-  let editorui = document.querySelector("#editorui");
+  let editorui = getEditorUI();
   let row = editorui.insertRow(editorui.rows.length - 1);
   settings.rows.forEach(r => {
     createCell({
