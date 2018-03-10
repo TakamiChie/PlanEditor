@@ -54,6 +54,7 @@ const path = require('path');
 
 let settings;
 let openedFileName;
+var grid;
 
 require("electron").ipcRenderer.on("fileOpen", (e, arg) => {
   menuop_fileOpen(arg);
@@ -668,20 +669,58 @@ function aggregates() {
  * @param {HTMLTableElement} editorui テーブルオブジェクト
  */
 function resetHeaderRow(editorui) {
-  if(editorui.rows.length > 1){
-    editorui.deleteRow(0);
-  }
-  var row = editorui.insertRow(0);
-  settings.rows.forEach(r => {
-    createCell({
-      rowobject: row,
-      insertIndex: -1,
-      role: r.role,
-      value: r.name,
-      header: true
-    })
+  var columns = [];
+  settings.rows.forEach((r, i) => {
+    var column = {}; 
+    column.id = "item"+i;
+    column.name = r.name;
+    switch (r.role) {
+      case ROLE.STATIC:
+        column.focusable = false;
+        column.sortable = true;
+        break;
+      case ROLE.CHAPTER:
+        column.sortable = true;
+        column.editor = Slick.Editors.Text;
+        break;
+      case ROLE.AGGREGATE:
+        column.sortable = true;
+        column.editor = Slick.Editors.Text;
+        break;
+      case ROLE.CHARGE:
+        column.sortable = true;
+        column.editor = Slick.Editors.Text;
+        break;
+      case ROLE.TEXT:
+        column.editor = Slick.Editors.LongText;
+        break;
+      case ROLE.NUMBER:
+        column.sortable = true;
+        column.editor = Slick.Editors.Integer;
+        break;
+      case ROLE.DATE:
+        column.sortable = true;
+        column.editor = Slick.Editors.Date;
+        break;
+      default:
+        throw `Invalid Role At ${r.name}`;
+        break;
+    }
+    columns.push(column);
   });
-  lastRowUpdate();
+  if(grid != undefined){
+    grid.setColumn(columns);
+  }else{
+    let options = {
+      editable: true,
+      enableAddRow: true,
+      enableCellNavigation: true,
+      asyncEditorLoading: false,
+      autoEdit: false,
+      enableColumnReorder: false
+    }
+    grid = new Slick.Grid("#editorui", [], columns, options);
+  }
 }
 
 /**

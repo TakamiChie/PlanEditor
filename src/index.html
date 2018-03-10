@@ -4,16 +4,19 @@
   <meta charset="UTF-8">
   <link rel="stylesheet" type="text/css" href="index.css">
   <link rel="stylesheet" href="../node_modules/bootstrap-honoka/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../node_modules/slickgrid/slick.grid.css" type="text/css"/>
+  <link rel="stylesheet" href="../node_modules/slickgrid/css/smoothness/jquery-ui-1.11.3.custom.css" type="text/css"/>
   <title>Plan Editor</title>
 </head>
 <body>
   <div id="toast" class="alert"></div>
   <div id="container">
-    <table id="editorui">
+    <table id="editorui.bak" style="display:none;">
       <tr>
         <td class="pushable"><button class="btn btn-primary" id="appendrow">行を追加</button></td>
       </tr>
     </table>
+    <div id="editorui"></div>
   </div>
   <footer id="aggregates" class="panel panel-info">
     <h1 class="panel-heading"><a data-toggle="collapse" data-parent="#aggregates_fields" href="#aggregates_fields">集計</a></h1>
@@ -100,6 +103,14 @@
 
   <script src="loadjquery.js"></script>
   <script src="../node_modules/bootstrap-honoka/dist/js/bootstrap.js"></script>
+  <script src="../node_modules/slickgrid/slick.core.js"></script>
+  <script src="../node_modules/slickgrid/lib/jquery.event.drag-2.3.0.js"></script>
+  <script src="../node_modules/slickgrid/slick.grid.js"></script>
+  <script src="../node_modules/slickgrid/slick.editors.js"></script>
+  <script src="../node_modules/slickgrid/slick.formatters.js"></script>
+  <script src="../node_modules/slickgrid/plugins/slick.cellrangedecorator.js"></script>
+  <script src="../node_modules/slickgrid/plugins/slick.cellrangeselector.js"></script>
+  <script src="../node_modules/slickgrid/plugins/slick.cellselectionmodel.js"></script>
   <script src="index.js"></script>
 </body>
 </html>
