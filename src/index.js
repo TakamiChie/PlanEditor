@@ -147,6 +147,7 @@ function menuop_fileClose() {
 }
 
 function menuop_append_column() {
+  // SlickGrid対応必要
   showColumnDialog(true).then((value) => {
     // 設定値更新
     settings.rows.push({name: value.name, role: value.role});
@@ -185,6 +186,7 @@ function menuop_append_column() {
  * @param {string} fileName ファイル名
  */
 function fileOpen(fileName) {
+  // SlickGrid対応必要
   const fs = require("fs");
   const yaml = require("js-yaml");
   fs.readFile(fileName, "utf8", (err, data) => {
@@ -235,6 +237,7 @@ function fileOpen(fileName) {
  * @param {string} fileName ファイル名
  */
 function fileSave(fileName){
+  // SlickGrid対応必要
   var serialize = {};
   let editorui = getEditorUI();
   serialize["filever"] = FILEVERSION;
@@ -310,6 +313,7 @@ function createCell({
   value = "",
   header = false
 } = {}){
+  // SlickGrid対応必要？
   if(rowobject == undefined){
     throw new Error("Argument `rowobject` is not defined");
   }
@@ -400,6 +404,7 @@ function redrawGrid(rowIndex, inProcess) {
  * @param {EventHandler} eventHandler イベントハンドラ
  */
 function resetEventHandler(cell, eventHandler) {
+  // SlickGrid対応必要
   cell.querySelectorAll(".dropdown-menu > li").forEach((i) => {
     let a = i.querySelector("a");
     a.removeEventListener("click", eventHandler);
@@ -413,6 +418,7 @@ function resetEventHandler(cell, eventHandler) {
  * @param {number} dstIndex 並び替え先の行インデックス
  */
 function swapRow(srcIndex, dstIndex){
+  // SlickGrid対応必要
   console.log(`swapRow(${srcIndex}, ${dstIndex})`);
   let editorui = getEditorUI();
   if(1 > srcIndex || srcIndex >= editorui.rows.length - 1){
@@ -441,6 +447,7 @@ function swapRow(srcIndex, dstIndex){
  * @param {number} index 削除する行の行インデックス
  */
 function removeRow(index){
+  // SlickGrid対応必要
   let editorui = getEditorUI();
   if(1 > index || index >= editorui.rows.length - 1){
     throw "Range Error At index";
@@ -456,6 +463,7 @@ function removeRow(index){
  * @param {number} dstIndex 並び替え先の列インデックス
  */
 function swapColumn(srcIndex, dstIndex){
+  // SlickGrid対応必要
   console.log(`swapColumn(${srcIndex}, ${dstIndex})`);
   if(1 > srcIndex || srcIndex >= settings.rows.length){
     throw "Range Error At srcIndex";
@@ -493,6 +501,7 @@ function swapColumn(srcIndex, dstIndex){
  * @param {number} index 削除する列のインデックス 
  */
 function removeColumn(index){
+  // SlickGrid対応必要
   if(1 > index || index >= settings.rows.length){
     throw "Range Error At index";
   }
@@ -513,6 +522,7 @@ function removeColumn(index){
  * @returns ダイアログの結果を示すPromiseオブジェクト
  */
 function showColumnDialog(append = false, name = "", role = ROLE.CHAPTER){
+  // SlickGrid対応必要
   const dlg = document.querySelector("#dlg-columns");
 
   return new Promise((resolve, reject) => {
@@ -575,6 +585,7 @@ function showColumnDialog(append = false, name = "", role = ROLE.CHAPTER){
  * 最後の行（行の追加ボタン）のサイズを更新する
  */
 function lastRowUpdate(){
+  // SlickGrid対応必要
   let editorui = getEditorUI();
   // 最終行の列数追加
   editorui.rows[editorui.rows.length - 1].cells[0].colSpan = settings.rows.length;
@@ -596,6 +607,7 @@ function saveSettings(){
  * 自動採番処理を実行する
  */
 function renumber() {
+  // SlickGrid対応必要
   var start = new Date().getTime(); 
   console.log("renumber started");
   // 章番号配列の作成
@@ -638,6 +650,7 @@ function renumber() {
  * 集計行の再集計処理を行う
  */
 function aggregates() {
+  // SlickGrid対応必要
   var start = new Date().getTime(); 
   console.log("aggregate started");
   // 集計配列の作成
@@ -829,6 +842,7 @@ function init(){
  * @param {EventArgs} event
  */
 function rowmenu_onclick(event){
+  // SlickGrid対応必要
   let editorui = getEditorUI();
   let a = event.target.nodeName == "A" ? event.target : event.target.parentNode;
   var rowid = a.parentNode.parentNode.parentNode.parentNode.parentNode.rowIndex;
@@ -865,6 +879,7 @@ function rowmenu_onclick(event){
  * @param {EventArgs} event イベント発生時のオブジェクトを示す
  */
 function colmenu_onclick(event){
+  // SlickGrid対応必要
   let editorui = getEditorUI();
   let rowobject = editorui.rows[0];
   let a = event.target.nodeName == "A" ? event.target : event.target.parentNode;
