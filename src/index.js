@@ -263,11 +263,14 @@ function fileSave(fileName){
   });
 }
 
+/**
+ * ファイルを閉じる
+ */
 function fileClose(){
-  let editorui = getEditorUI();
-  while(editorui.rows.length > 2){
-    editorui.deleteRow(1);
-  }
+  redrawGrid(undefined, () => { 
+    tabledata = [];
+    grid.setData(tabledata, true);
+  });
   setOpenedFileName("");
 }
 
