@@ -370,12 +370,20 @@ function createSlickGrid(columns) {
   grid.getSelectionModel(new Slick.CellSelectionModel());
   grid.onAddNewRow.subscribe((e, args) => {
     var item = args.item;
-    grid.invalidateRow(tabledata.length);
-    tabledata.push(item);
-    grid.updateRowCount();
-    grid.render();
+    gridRedraw(tabledata.length, () => {
+      tabledata.push(item);
+    });
   });
   return grid;
+}
+
+function gridRedraw(rowIndex, inProcess) {
+  if(typeof rowIndex == "number"){ grid.invalidateRow(rowIndex); }
+  else if(typeof rowIndex == "object"){ grid.invalidateRows(rowIndex); }
+  else{ grid.invalidateAllRows(); }
+  if(typeof inProcess == "function"){ inProcess(); }
+  grid.updateRowCount();
+  grid.render();
 }
 /**
  * セルのメニューにイベントハンドラを再セットする
