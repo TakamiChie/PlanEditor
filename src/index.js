@@ -370,14 +370,19 @@ function createSlickGrid(columns) {
   grid.getSelectionModel(new Slick.CellSelectionModel());
   grid.onAddNewRow.subscribe((e, args) => {
     var item = args.item;
-    gridRedraw(tabledata.length, () => {
+    redrawGrid(tabledata.length, () => {
       tabledata.push(item);
     });
   });
   return grid;
 }
 
-function gridRedraw(rowIndex, inProcess) {
+/**
+ * グリッドの再描画を行う
+ * @param {number|array} rowIndex 再描画する行インデックス。配列か数値を指定可能。どちらも指定しなかった場合、すべての行を再描画する。
+ * @param {function} inProcess invalidateRowメソッド呼び出しの直後に実行される処理。テーブルデータの処理などを行う。
+ */
+function redrawGrid(rowIndex, inProcess) {
   if(typeof rowIndex == "number"){ grid.invalidateRow(rowIndex); }
   else if(typeof rowIndex == "object"){ grid.invalidateRows(rowIndex); }
   else{ grid.invalidateAllRows(); }
