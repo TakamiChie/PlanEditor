@@ -218,11 +218,9 @@ function fileSave(fileName){
   serialize["rows"] = settings.rows;
   serialize["data"] = [];
   tabledata.forEach((data) => {
-    let rowdata = {"項番": data["項番"]}
-    Object.keys(data).forEach(name => {
-      if(name != "項番"){
-        rowdata[name] = data[name];
-      }
+    let rowdata = {}
+    settings.rows.forEach(c => {
+      rowdata[c.name] = data[c.name];
     });
     serialize["data"].push(rowdata);
   });
