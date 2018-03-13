@@ -709,7 +709,7 @@ function aggregates() {
 }
 
 /**
- * ヘッダ行を削除し再生成する
+ * ヘッダ行を再設定する
  * @param {HTMLElement} editorui テーブルオブジェクト
  */
 function resetHeaderRow(editorui) {
