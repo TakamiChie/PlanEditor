@@ -273,68 +273,6 @@ function getEditorUI(){
 }
 
 /**
- * セルを追加する
- * @param {HTMLRowObject} rowobject 行を示すオブジェクト
- * @param {number} insertindex セルを追加するインデックス。省略時-1
- * @param {ROLE} role セルのロール。省略時ROLE.STATIC
- * @param {string} value セルの値。省略時は空文字列
- * @param {boolean} header セルはヘッダセルかどうか。省略時false
- */
-function createCell({
-  rowobject, 
-  insertIndex = -1,
-  role = ROLE.STATIC,
-  value = "",
-  header = false
-} = {}){
-  // SlickGrid対応必要？
-  if(rowobject == undefined){
-    throw new Error("Argument `rowobject` is not defined");
-  }
-  let cell;
-  if(header){
-    cell = document.createElement("th");
-    if(role == ROLE.STATIC){
-      // 編集・移動を一切行わない
-      cell.textContent = value;
-    }else{
-      // 編集・移動可能
-      let colmenu = document.querySelector("#dlg-colmenu");
-      cell.innerHTML = colmenu.innerHTML;
-      cell.querySelector(".text").textContent = value;
-      resetEventHandler(cell, colmenu_onclick);
-    }
-    if(insertIndex == -1){
-      rowobject.appendChild( cell );
-    }else{
-      rowobject.insertBefore( cell, rowobject.rows[insertIndex] );
-    }
-  }else{
-    cell = rowobject.insertCell(insertIndex);
-  }
-  if(role == ROLE.STATIC && !header){
-    // セルは項番セル・編集・移動可能
-    let rowmenu = document.querySelector("#dlg-rowmenu");
-    cell.innerHTML = rowmenu.innerHTML;
-    cell.querySelector(".text").textContent = value;
-    resetEventHandler(cell, rowmenu_onclick);
-  }
-  if(role == ROLE.STATIC || header){
-    // セルはラベル
-    cell.contentEditable = false;
-    cell.dataset.role = role;
-  }else{
-    // セルは編集可能
-    cell.contentEditable = true;
-    cell.className = "editable";
-    cell.addEventListener("blur", cells_onblur);
-    cell.dataset.role = role;
-    cell.textContent = value;
-  }
-  return cell;
-}
-
-/**
  * Slickgridを作成する
  * @param {*} columns カラムデータを格納した配列
  */
