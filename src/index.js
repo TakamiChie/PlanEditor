@@ -937,19 +937,5 @@ $(document).ready(() => {
 $(window).resize(() => {
   resizeObject();
 });
-  
-document.querySelector("#appendrow").addEventListener("click", () =>{
-  let editorui = getEditorUI();
-  let row = editorui.insertRow(editorui.rows.length - 1);
-  settings.rows.forEach(r => {
-    createCell({
-      rowobject: row,
-      insertIndex: -1,
-      role: r.role,
-      value: "",
-    });
-  });
-  renumber();
-});
 
 init();
