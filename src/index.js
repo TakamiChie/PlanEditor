@@ -377,7 +377,22 @@ function createSlickGrid(columns) {
     redrawGrid(tabledata.length, () => {
       tabledata.push(item);
     });
+    renumber();
+    aggregates();
   });
+  grid.onCellChange.subscribe((e, args) => {
+    switch (settings.rows[args.cell].role) {
+      case ROLE.AGGREGATE:
+      case ROLE.CHARGE:
+        aggregates();  
+        break;
+      case ROLE.CHAPTER:
+        renumber();
+        break;
+      default:
+        break;
+    }
+  })
   return grid;
 }
 
@@ -623,7 +638,7 @@ function renumber() {
   for (let i = 0; i < tabledata.length; i++) {
     // カレント行の章題取得
     indexes.forEach((item, index) => {
-      ccur[index] = tabledata[i][item].trim();      
+      ccur[index] = (tabledata[i][item] + "").trim();
     });
     // 前の行と変わった題名の箇所は？
     for (let l = 0; l < indexes.length; l++) {
