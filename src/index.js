@@ -220,7 +220,7 @@ function fileSave(fileName){
   tabledata.forEach((data) => {
     let rowdata = {}
     settings.rows.forEach(c => {
-      rowdata[c.name] = data[c.name];
+      rowdata[c.name] = (data[c.name] || "");
     });
     serialize["data"].push(rowdata);
   });
