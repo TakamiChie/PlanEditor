@@ -926,6 +926,9 @@ function cells_onblur(e){
 
 }
 
+/**
+ * 画面リサイズ時に、Containerをリサイズする
+ */
 function resizeObject() {
   let hsize = $(window).height();
   let fsize = $("footer").height() * 2;
