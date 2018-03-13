@@ -186,7 +186,6 @@ function menuop_append_column() {
  * @param {string} fileName ファイル名
  */
 function fileOpen(fileName) {
-  // SlickGrid対応必要
   const fs = require("fs");
   const yaml = require("js-yaml");
   fs.readFile(fileName, "utf8", (err, data) => {
@@ -207,18 +206,17 @@ function fileOpen(fileName) {
 
         // テーブルデータ読み込み
         let table = loadData.data;
+        tabledata = [];
         table.forEach(rowdata => {
-          var row = editorui.insertRow(editorui.rows.length - 1);
+          var row = {}
           settings.rows.forEach(r => {
-            createCell({
-              rowobject: row,
-              insertIndex: -1,
-              role: r.role,
-              value: rowdata[r.name] ? rowdata[r.name] : "",
-              header: false
-            });
+            if(r.name != "項番"){
+              row[r.name] = rowdata[r.name];
+            }
           });
+          tabledata.push(row);
         });
+        redrawGrid(undefined, () => { grid.setData(tabledata)})
         setOpenedFileName(fileName);
         toast(`${path.basename(fileName)}を読み込みました。`);
         console.log("Open Finished");
@@ -607,7 +605,6 @@ function saveSettings(){
  * 自動採番処理を実行する
  */
 function renumber() {
-  // SlickGrid対応必要
   var start = new Date().getTime(); 
   console.log("renumber started");
   // 章番号配列の作成
@@ -615,21 +612,20 @@ function renumber() {
   var indexes = [];
   var cprev;
   var ccur;
-  for (let i = 0; i < settings.rows.length; i++) {
-    if(settings.rows[i].role == ROLE.CHAPTER){
-      indexes.push(i);
+  settings.rows.forEach((r) => {
+    if(r.role == ROLE.CHAPTER){
+      indexes.push(r.name);
       no.push(0);
     }
-  }
+  })
   cprev = Array.from(no);
   ccur = Array.from(no);
   // 採番処理の開始
-  var editorui = getEditorUI();
-  for (let i = 1; i < editorui.rows.length - 1; i++) {
+  for (let i = 0; i < tabledata.length; i++) {
     // カレント行の章題取得
-    for (let l = 0; l < indexes.length; l++) {
-      ccur[l] = editorui.rows[i].cells[indexes[l]].textContent.trim();
-    }
+    indexes.forEach((item, index) => {
+      ccur[index] = tabledata[i][item].trim();      
+    });
     // 前の行と変わった題名の箇所は？
     for (let l = 0; l < indexes.length; l++) {
       if(cprev[l] != ccur[l]){
@@ -640,8 +636,9 @@ function renumber() {
     }
     cprev = Array.from(ccur);
     let num = no.join("-");
-    editorui.rows[i].cells[0].querySelector(".text").textContent = num;
+    tabledata[i]["項番"] = num;
   }
+  redrawGrid();
   
   console.log(`renumber finished ${new Date().getTime() - start} ms`);
 }
@@ -650,42 +647,36 @@ function renumber() {
  * 集計行の再集計処理を行う
  */
 function aggregates() {
-  // SlickGrid対応必要
   var start = new Date().getTime(); 
   console.log("aggregate started");
   // 集計配列の作成
-  var aggregate = [];
-  var indexes = [];
+  var aggregate = {};
   var charge = undefined;
-  for (let i = 0; i < settings.rows.length; i++) {
-    if(settings.rows[i].role == ROLE.AGGREGATE){
-      aggregate.push({TOTAL:0});
-      indexes.push(i);
+  settings.rows.forEach((r) => {
+    if(r.role == ROLE.AGGREGATE){
+      aggregate[r.name] = {TOTAL:0};
     }
-    if(settings.rows[i].role == ROLE.CHARGE){
-      charge = i;
+    if(r.role == ROLE.CHARGE){
+      charge = r.name;
     }
-  }
+  })
   // 集計処理の開始
-  var editorui = getEditorUI();
-  for (let i = 1; i < editorui.rows.length - 1; i++) {
-    for (let l = 0; l < indexes.length; l++) {
-      let c = parseFloat(editorui.rows[i].cells[indexes[l]].textContent);
+  for (let i = 0; i < tabledata.length; i++) {
+    Object.keys(aggregate).forEach((a) => {
+      let c = parseFloat(tabledata[i][a]);
       cn = isNaN(c) ? 0 : c;
-      aggregate[l].TOTAL += cn;
+      aggregate[a].TOTAL += cn;
       if(charge != undefined){
-        if(aggregate[l]["e"+editorui.rows[i].cells[charge].textContent] == undefined){
-          aggregate[l]["e"+editorui.rows[i].cells[charge].textContent] = 0;
-        }
-        aggregate[l]["e"+editorui.rows[i].cells[charge].textContent] += cn;
+        let name = "e" + tabledata[i][charge];
+        aggregate[a][name] = (aggregate[a][name] || 0) + cn;
       }
-    }
+    })
   }
 
   console.log(aggregate);
   var aggregates_fields = document.querySelector("#aggregates_fields");
   aggregates_fields.innerHTML = "";
-  aggregate.forEach((a, i) => {
+  Object.keys(aggregate).forEach((a, i) => {
     let section = document.createElement("section");
     let title = document.createElement("h2");
     let dl = document.createElement("dl");
@@ -693,25 +684,24 @@ function aggregates() {
     let dd = document.createElement("dd");
     section.appendChild(title);
     section.appendChild(dl);
-    title.textContent = settings.rows[indexes[i]].name;
+    title.textContent = a;
     dt.textContent = "合計";
-    dd.textContent = a.TOTAL;
+    dd.textContent = aggregate[a].TOTAL;
     dd.className = "label label-primary";
     dl.appendChild(dt);
     dl.appendChild(dd);
     // 担当者別集計を列挙
-    for (const key in a) {
-      if (a.hasOwnProperty(key) && key.charAt(0) == "e") {
-        const element = a[key];
+    Object.keys(aggregate[a]).forEach((key) => {
+      if(key.charAt(0) == "e"){
         let dt = document.createElement("dt");
         let dd = document.createElement("dd");
         dt.textContent = key.substring(1);
-        dd.textContent = a[key];
+        dd.textContent = aggregate[a][key];
         dl.appendChild(dt);
         dl.appendChild(dd);
         dd.className = "label label-info";
       }
-    }
+    });
     aggregates_fields.appendChild(section);
   });
 
@@ -764,7 +754,7 @@ function resetHeaderRow(editorui) {
     columns.push(column);
   });
   if(grid != undefined){
-    grid.setColumn(columns);
+    grid.setColumns(columns);
   }else{
     grid = createSlickGrid(columns); 
   }
