@@ -147,33 +147,10 @@ function menuop_fileClose() {
 }
 
 function menuop_append_column() {
-  // SlickGrid対応必要
   showColumnDialog(true).then((value) => {
     // 設定値更新
     settings.rows.push({name: value.name, role: value.role});
-    let editorui = getEditorUI();
-    let rows = editorui.rows;
-    // セルの追加
-    for (let i = 0; i < rows.length - 1; i++) {
-      if(i == 0){
-        // ヘッダ行
-        createCell({
-          rowobject: rows.item(i),
-          value: value.name,
-          role: value.role,
-          insertIndex: -1,
-          header: true
-        });
-      }else{
-        // データ行
-        createCell({
-          rowobject: rows.item(i),
-          role: value.role,
-          insertIndex: -1,
-        });        
-      }
-    }
-    lastRowUpdate();
+    resetHeaderRow(getEditorUI());
     renumber();
     aggregates();
     saveSettings();
@@ -367,7 +344,7 @@ function createSlickGrid(columns) {
     enableAddRow: true,
     enableCellNavigation: true,
     asyncEditorLoading: false,
-    autoEdit: true,
+    autoEdit: false,
     enableColumnReorder: false
   }
   grid = new Slick.Grid("#editorui", tabledata, columns, options);
@@ -593,15 +570,6 @@ function showColumnDialog(append = false, name = "", role = ROLE.CHAPTER){
   });
 }
 
-/**
- * 最後の行（行の追加ボタン）のサイズを更新する
- */
-function lastRowUpdate(){
-  // SlickGrid対応必要
-  let editorui = getEditorUI();
-  // 最終行の列数追加
-  editorui.rows[editorui.rows.length - 1].cells[0].colSpan = settings.rows.length;
-}
 /**
  *  設定値を直ちに保存する
  */
