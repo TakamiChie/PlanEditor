@@ -235,21 +235,20 @@ function fileOpen(fileName) {
  * @param {string} fileName ファイル名
  */
 function fileSave(fileName){
-  // SlickGrid対応必要
   var serialize = {};
   let editorui = getEditorUI();
   serialize["filever"] = FILEVERSION;
   serialize["rows"] = settings.rows;
-  var rows = editorui.rows;
-  var tabledata = [];
-  for (var i = 1; i < rows.length - 1; i++) {
-    var rowdata = {};
-    for (let l = 0; l < rows[i].cells.length; l++) {
-      rowdata[settings.rows[l].name] = rows[i].cells[l].textContent;
-    }
-    tabledata.push(rowdata);
-  }
-  serialize["data"] = tabledata;
+  serialize["data"] = [];
+  tabledata.forEach((data) => {
+    let rowdata = {"項番": data["項番"]}
+    Object.keys(data).forEach(name => {
+      if(name != "項番"){
+        rowdata[name] = data[name];
+      }
+    });
+    serialize["data"].push(rowdata);
+  });
   const fs = require("fs");
   const yaml = require("js-yaml");
   fs.writeFile(fileName, yaml.safeDump(serialize), "utf8", (err) => {
