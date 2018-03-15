@@ -64,7 +64,16 @@ function createSlickGrid(columns) {
     renumber();
   });
   grid.registerPlugin(moveRowsPlugin);
-    
+
+  grid.onDblClick.subscribe((e, args) => {
+    if(tabledata[args.row] && tabledata[args.row]["項番"] && 
+      confirm(tabledata[args.row]["項番"] + "を削除しますか？")){
+      redrawGrid(undefined, () => {
+        tabledata.splice(args.row, 1);
+      })
+    }
+  });
+
   grid.onAddNewRow.subscribe((e, args) => {
     var item = args.item;
     redrawGrid(tabledata.length, () => {
