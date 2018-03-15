@@ -577,10 +577,12 @@ function resetHeaderRow(editorui) {
     column.id = r.name;
     column.name = r.name;
     column.field = r.name;
+    column.cssClass = "role_" + r.role.toLowerCase();
     switch (r.role) {
       case ROLE.STATIC:
         column.focusable = false;
         column.sortable = true;
+        column.behavior = "selectAndMove";
         break;
       case ROLE.CHAPTER:
         column.sortable = true;

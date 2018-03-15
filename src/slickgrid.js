@@ -20,7 +20,51 @@ function createSlickGrid(columns) {
     enableColumnReorder: false
   }
   grid = new Slick.Grid("#editorui", tabledata, columns, options);
-  grid.getSelectionModel(new Slick.CellSelectionModel());
+  grid.setSelectionModel(new Slick.RowSelectionModel());
+  var moveRowsPlugin = new Slick.RowMoveManager({
+    cancelEditOnDrag: true
+  });
+  moveRowsPlugin.onBeforeMoveRows.subscribe(function (e, data) {
+    for (var i = 0; i < data.rows.length; i++) {
+      // no point in moving before or after itself
+      if (data.rows[i] == data.insertBefore || data.rows[i] == data.insertBefore - 1) {
+        e.stopPropagation();
+        return false;
+      }
+    }
+    return true;
+  });
+  moveRowsPlugin.onMoveRows.subscribe(function (e, args) {
+    var extractedRows = [], left, right;
+    var rows = args.rows;
+    var insertBefore = args.insertBefore;
+    left = tabledata.slice(0, insertBefore);
+    right = tabledata.slice(insertBefore, tabledata.length);
+    rows.sort(function(a,b) { return a-b; });
+    for (var i = 0; i < rows.length; i++) {
+      extractedRows.push(tabledata[rows[i]]);
+    }
+    rows.reverse();
+    for (var i = 0; i < rows.length; i++) {
+      var row = rows[i];
+      if (row < insertBefore) {
+        left.splice(row, 1);
+      } else {
+        right.splice(row - insertBefore, 1);
+      }
+    }
+    tabledata = left.concat(extractedRows.concat(right));
+    var selectedRows = [];
+    for (var i = 0; i < rows.length; i++)
+      selectedRows.push(left.length + i);
+    grid.resetActiveCell();
+    grid.setData(tabledata);
+    grid.setSelectedRows(selectedRows);
+    grid.render();
+    renumber();
+  });
+  grid.registerPlugin(moveRowsPlugin);
+    
   grid.onAddNewRow.subscribe((e, args) => {
     var item = args.item;
     redrawGrid(tabledata.length, () => {
@@ -29,6 +73,7 @@ function createSlickGrid(columns) {
     renumber();
     aggregates();
   });
+  
   grid.onCellChange.subscribe((e, args) => {
     switch (settings.rows[args.cell].role) {
       case ROLE.AGGREGATE:
