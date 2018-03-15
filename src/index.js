@@ -283,43 +283,24 @@ function resetEventHandler(cell, eventHandler) {
  * @param {number} dstIndex 並び替え先の行インデックス
  */
 function swapRow(srcIndex, dstIndex){
-  // SlickGrid対応必要
-  console.log(`swapRow(${srcIndex}, ${dstIndex})`);
-  let editorui = getEditorUI();
-  if(1 > srcIndex || srcIndex >= editorui.rows.length - 1){
-    throw "Range Error At srcIndex";
-  }
-  if(1 > dstIndex || dstIndex >= editorui.rows.length - 1){
-    throw "Range Error At dstIndex";
-  }
   if(srcIndex == dstIndex){
     throw "Index is Same";
   }
-  // セルの並び替え
-  let rows = editorui.rows;
-  var src = rows[srcIndex];
-  var dst = rows[dstIndex];
-  var srcC = src.cloneNode(true);
-  var dstC = dst.cloneNode(true);
-  src.parentNode.replaceChild( dstC, src );
-  dst.parentNode.replaceChild( srcC, dst );
-  resetEventHandler(srcC.cells[0], rowmenu_onclick);
-  resetEventHandler(dstC.cells[0], rowmenu_onclick);
-}
-
-/**
- * 行を削除する
- * @param {number} index 削除する行の行インデックス
- */
-function removeRow(index){
-  // SlickGrid対応必要
-  let editorui = getEditorUI();
-  if(1 > index || index >= editorui.rows.length - 1){
-    throw "Range Error At index";
+  if(dstIndex > tabledata.length - 1){
+    dstIndex = 0;
   }
-  getEditorUI().deleteRow(index);
+  if(srcIndex < 0){
+    srcIndex = tabledata.length - 1;
+  }
+  console.log(`swapRow(${srcIndex}, ${dstIndex})`);
+  redrawGrid([srcIndex,dstIndex], () => {
+    var src = tabledata[srcIndex];
+    var dst = tabledata[dstIndex];
+    tabledata[dstIndex] = src;
+    tabledata[srcIndex] = dst;
+    grid.setData(tabledata, false);
+  });
   renumber();
-  aggregates();
 }
 
 /**
@@ -702,9 +683,6 @@ function rowmenu_onclick(event){
   switch (action) {
     case "+":
       toid = rowid + 1;
-      if(toid >= editorui.rows.length - 1){
-        toid = 1;
-      }
       swapRow(rowid, toid);
       break;
     case "-":
