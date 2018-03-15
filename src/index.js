@@ -583,7 +583,7 @@ function resetHeaderRow(editorui) {
         column.focusable = false;
         column.sortable = true;
         column.behavior = "selectAndMove";
-        column.toolTip = "ダブルクリックで行を削除します";
+        column.toolTip = "行のダブルクリックで行を削除します";
         break;
       case ROLE.CHAPTER:
         column.sortable = true;
