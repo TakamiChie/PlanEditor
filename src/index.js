@@ -332,16 +332,11 @@ function swapColumn(srcIndex, dstIndex){
  * @param {number} index 削除する列のインデックス 
  */
 function removeColumn(index){
-  // SlickGrid対応必要
   if(1 > index || index >= settings.rows.length){
     throw "Range Error At index";
   }
   settings.rows.splice(index, 1);
-  let editorui = getEditorUI();
-  let rows = editorui.rows;
-  for (let i = 0; i < rows.length - 1; i++) {
-    rows[i].deleteCell( index );
-  }
+  resetHeaderRow(getEditorUI());
   saveSettings();
 }
 
