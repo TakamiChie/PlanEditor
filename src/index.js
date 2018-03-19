@@ -670,40 +670,6 @@ function init(){
 }
 
 /**
- * 行ヘッダメニューのイベントハンドラ
- * @param {EventArgs} event
- */
-function rowmenu_onclick(event){
-  // SlickGrid対応必要
-  let editorui = getEditorUI();
-  let a = event.target.nodeName == "A" ? event.target : event.target.parentNode;
-  var rowid = a.parentNode.parentNode.parentNode.parentNode.parentNode.rowIndex;
-  var toid;
-  let action = a.dataset.role;
-  switch (action) {
-    case "+":
-      toid = rowid + 1;
-      swapRow(rowid, toid);
-      break;
-    case "-":
-      toid = rowid - 1;
-      if(toid <= 0){
-        toid = editorui.rows.length - 2;
-      }
-      swapRow(rowid, toid);
-      break;
-    case "x":
-      if(confirm("行を削除してもよろしいですか？")){
-        removeRow(rowid);
-      }
-      break;
-    default:
-      throw "unknown method";
-      break;
-  }
-}
-
-/**
  * 列ヘッダメニューのイベントハンドラ
  * @param {EventArgs} event イベント発生時のオブジェクトを示す
  */
