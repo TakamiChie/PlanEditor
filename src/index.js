@@ -348,7 +348,6 @@ function removeColumn(index){
  * @returns ダイアログの結果を示すPromiseオブジェクト
  */
 function showColumnDialog(append = false, name = "", role = ROLE.CHAPTER){
-  // SlickGrid対応必要
   const dlg = document.querySelector("#dlg-columns");
 
   return new Promise((resolve, reject) => {
