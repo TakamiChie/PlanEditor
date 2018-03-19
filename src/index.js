@@ -309,36 +309,21 @@ function swapRow(srcIndex, dstIndex){
  * @param {number} dstIndex 並び替え先の列インデックス
  */
 function swapColumn(srcIndex, dstIndex){
-  // SlickGrid対応必要
-  console.log(`swapColumn(${srcIndex}, ${dstIndex})`);
-  if(1 > srcIndex || srcIndex >= settings.rows.length){
-    throw "Range Error At srcIndex";
-  }
-  if(1 > dstIndex || dstIndex >= settings.rows.length){
-    throw "Range Error At dstIndex";
-  }
   if(srcIndex == dstIndex){
     throw "Index is Same";
   }
+  if(dstIndex > settings.rows.length - 1){
+    dstIndex = 1;
+  }
+  if(srcIndex < 1){
+    srcIndex = settings.rows.length - 1;
+  }
+  console.log(`swapColumn(${srcIndex}, ${dstIndex})`);
   // 設定値の並び替え
   var tmp = settings.rows[srcIndex];
   settings.rows[srcIndex] = settings.rows[dstIndex];
   settings.rows[dstIndex] = tmp;
-  // セルの並び替え
-  let editorui = getEditorUI();
-  let rows = editorui.rows;
-  for (let i = 0; i < rows.length - 1; i++) {
-    var src = rows[i].cells[srcIndex];
-    var dst = rows[i].cells[dstIndex];
-    var srcC = src.cloneNode(true);
-    var dstC = dst.cloneNode(true);
-    src.parentNode.replaceChild( dstC, src );
-    dst.parentNode.replaceChild( srcC, dst );
-    if(i == 0){
-      resetEventHandler(srcC, colmenu_onclick);
-      resetEventHandler(dstC, colmenu_onclick);
-    }
-  }
+  resetHeaderRow(getEditorUI());
   saveSettings();
 }
 
