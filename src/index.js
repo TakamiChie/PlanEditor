@@ -263,21 +263,6 @@ function setOpenedFileName(newFileName){
 }
 
 /**
- * セルのメニューにイベントハンドラを再セットする
- * @description swapColumn実施後、イベントハンドラが消えることがあるため再設定する
- * @param {HTMLTableCellElement} cell セルオブジェクト
- * @param {EventHandler} eventHandler イベントハンドラ
- */
-function resetEventHandler(cell, eventHandler) {
-  // SlickGrid対応必要
-  cell.querySelectorAll(".dropdown-menu > li").forEach((i) => {
-    let a = i.querySelector("a");
-    a.removeEventListener("click", eventHandler);
-    a.addEventListener("click", eventHandler);
-  });
-}
-
-/**
  * 行を並び替える
  * @param {number} srcIndex 並び替え元の行インデックス
  * @param {number} dstIndex 並び替え先の行インデックス
@@ -646,44 +631,6 @@ function init(){
     let editorui = getEditorUI();
     resetHeaderRow(editorui);
   });
-}
-
-/**
- * 列ヘッダメニューのイベントハンドラ
- * @param {EventArgs} event イベント発生時のオブジェクトを示す
- */
-function colmenu_onclick(event){
-  // SlickGrid対応必要
-  let editorui = getEditorUI();
-  let rowobject = editorui.rows[0];
-  let a = event.target.nodeName == "A" ? event.target : event.target.parentNode;
-  var colid = a.parentNode.parentNode.parentNode.parentNode.cellIndex;
-  var toid;
-  let action = a.dataset.role;
-  switch (action) {
-    case "+":
-      toid = colid + 1;
-      if(toid >= rowobject.cells.length){
-        toid = 1;
-      }
-      swapColumn(colid, toid);
-      break;
-    case "-":
-      toid = colid - 1;
-      if(toid <= 0){
-        toid = rowobject.cells.length;
-      }
-      swapColumn(colid, toid);
-      break;
-    case "x":
-      if(confirm("列を削除してもよろしいですか？")){
-        removeColumn(colid);
-      }
-      break;
-    default:
-      throw "unknown method";
-      break;
-  }
 }
 
 /**
