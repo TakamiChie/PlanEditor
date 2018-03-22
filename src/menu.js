@@ -74,7 +74,7 @@ exports.menu = [
         id: "columnRemove",
         label: "列を削除(&M)",
         click: function() { BrowserWindow.getFocusedWindow().webContents.send("columnRemove"); },
-        accelerator: "CmdOrCtrl+Alt+Delete",
+        accelerator: "CmdOrCtrl+Delete",
         enabled: false
       },
       {
@@ -98,7 +98,7 @@ exports.menu = [
         id: "rowRemove",
         label: "行を削除(&V)",
         click: function() { BrowserWindow.getFocusedWindow().webContents.send("rowRemove"); },
-        accelerator: "CmdOrCtrl+Alt+Shift+Delete",
+        accelerator: "CmdOrCtrl+Shift+Delete",
         enabled: false
       },
     ]

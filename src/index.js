@@ -78,6 +78,34 @@ require("electron").ipcRenderer.on("appendColumn", (e) => {
   menuop_append_column();
 });
 
+ipc.on("columnMoveToLeft", (e) => {
+  menuop_move_column(-1);
+});
+
+ipc.on("columnMoveToRight", (e) => {
+  menuop_move_column(1);
+});
+
+ipc.on("columnRemove", (e) => {
+  if(confirm(settings.rows[grid.getActiveCell().row].name + "を削除しますか？")){
+    removeColumn(grid.getActiveCell().cell);
+  }
+});
+
+ipc.on("rowMoveToUpper", (e) => {
+  menuop_move_row(-1);
+});
+
+ipc.on("rowMoveToLower", (e) => {
+  menuop_move_row(1);
+});
+
+ipc.on("rowRemove", (e) => {
+  if(confirm(tabledata[grid.getActiveCell().row]["項番"] + "を削除しますか？")){
+    removeRow(grid.getActiveCell().row);
+  }  
+});
+
 //////////// メニュー用メソッド //////////////
 
 /**
@@ -157,6 +185,29 @@ function menuop_append_column() {
     saveSettings();
   });
 }
+
+/**
+ * 列を移動する
+ * @param {number} direction 移動方向。1または-1
+ */
+function menuop_move_column(direction) {
+  let i = grid.getActiveCell();
+  let a = swapColumn(i.cell, i.cell + direction);
+  grid.setActiveCell(i.row, a[1]);
+  renumber();
+}
+
+/**
+ * 行を移動する
+ * @param {number} direction 移動方向。1または-1
+ */
+function menuop_move_row(direction){
+  let i = grid.getActiveCell();
+  let a = swapRow(i.row, i.row + direction);
+  grid.setActiveCell(a[1], i.cell);
+  renumber();
+}
+
 //////////// 各種メソッド //////////////
 
 /**
@@ -283,12 +334,17 @@ function swapRow(srcIndex, dstIndex){
   if(srcIndex == dstIndex){
     throw "Index is Same";
   }
-  if(dstIndex > tabledata.length - 1){
-    dstIndex = 0;
-  }
-  if(srcIndex < 0){
-    srcIndex = tabledata.length - 1;
-  }
+  let sd = [srcIndex, dstIndex];
+  for (let i = 0; i < sd.length; i++) {
+    if(sd[i] > tabledata.length - 1){
+      sd[i] = 0;
+    }
+    if(sd[i] < 0){
+      sd[i] = tabledata.length - 1;
+    }
+  };
+  srcIndex = sd[0];
+  dstIndex = sd[1];
   console.log(`swapRow(${srcIndex}, ${dstIndex})`);
   redrawGrid([srcIndex,dstIndex], () => {
     var src = tabledata[srcIndex];
@@ -298,23 +354,45 @@ function swapRow(srcIndex, dstIndex){
     grid.setData(tabledata, false);
   });
   renumber();
+  return [srcIndex, dstIndex];
+}
+
+/**
+ * 行を削除する
+ * @param {number} index 削除する行のインデックス 
+ */
+function removeRow(index){
+  if(1 > index || index >= settings.rows.length){
+    throw "Range Error At index";
+  }
+  redrawGrid(undefined, () => {
+    tabledata.splice(index, 1);
+  })
+  renumber();
+  aggregates();
 }
 
 /**
  * 列を並び替える
  * @param {number} srcIndex 並び替え元の列インデックス
  * @param {number} dstIndex 並び替え先の列インデックス
+ * @returns {array} 実際に並び替えた列のインデックス
  */
 function swapColumn(srcIndex, dstIndex){
   if(srcIndex == dstIndex){
     throw "Index is Same";
   }
-  if(dstIndex > settings.rows.length - 1){
-    dstIndex = 1;
-  }
-  if(srcIndex < 1){
-    srcIndex = settings.rows.length - 1;
-  }
+  let sd = [srcIndex, dstIndex];
+  for (let i = 0; i < sd.length; i++) {
+    if(sd[i] > settings.rows.length - 1){
+      sd[i] = 1;
+    }
+    if(sd[i] < 1){
+      sd[i] = settings.rows.length - 1;
+    }
+  };
+  srcIndex = sd[0];
+  dstIndex = sd[1];
   console.log(`swapColumn(${srcIndex}, ${dstIndex})`);
   // 設定値の並び替え
   var tmp = settings.rows[srcIndex];
@@ -322,6 +400,7 @@ function swapColumn(srcIndex, dstIndex){
   settings.rows[dstIndex] = tmp;
   resetHeaderRow(getEditorUI());
   saveSettings();
+  return [srcIndex, dstIndex];
 }
 
 /**
