@@ -87,7 +87,7 @@ ipc.on("columnMoveToRight", (e) => {
 });
 
 ipc.on("columnRemove", (e) => {
-  if(confirm(settings.rows[grid.getActiveCell().row].name + "を削除しますか？")){
+  if(confirm(settings.rows[grid.getActiveCell().cell].name + "を削除しますか？")){
     removeColumn(grid.getActiveCell().cell);
   }
 });
