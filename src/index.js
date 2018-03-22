@@ -47,6 +47,7 @@ const def_filters = [{
   extensions: ['pln']
 }]
 const electron = require('electron');
+const ipc = electron.ipcRenderer;
 const remote = electron.remote;
 const BrowserWindow = remote.BrowserWindow;
 const dialog = remote.dialog;
@@ -199,6 +200,7 @@ function fileOpen(fileName) {
         console.log("Open Finished");
         renumber();
         aggregates();
+        cellMenuUpdate();
       }else{
         alert("ファイルが読み込めません。ファイルが破損している可能性があります。");
       }
@@ -247,6 +249,7 @@ function fileClose(){
     grid.setData(tabledata, true);
   });
   setOpenedFileName("");
+  cellMenuUpdate();
 }
 
 /**
@@ -262,6 +265,15 @@ function setOpenedFileName(newFileName){
   }
 }
 
+/**
+ * カラム/行操作系メニューのEnabledを切り替える
+ * @param {boolean} column 列操作系メニューのEnabledを切り替える
+ * @param {boolean} row 行操作系メニューのEnabledを切り替える
+ */
+function cellMenuUpdate(column = true, row = true) {
+  if(column){ ipc.send("column_menu_state", settings.rows.length > 2); }
+  if(row){ ipc.send("row_menu_state", tabledata.length > 1); }
+}
 /**
  * 行を並び替える
  * @param {number} srcIndex 並び替え元の行インデックス

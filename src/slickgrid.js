@@ -83,6 +83,7 @@ function createSlickGrid(columns) {
     });
     renumber();
     aggregates();
+    cellMenuUpdate(false, true);
   });
   
   grid.onCellChange.subscribe((e, args) => {
@@ -98,6 +99,9 @@ function createSlickGrid(columns) {
         break;
     }
   })
+  grid.onActiveCellChanged.subscribe((e, args) => {
+    cellMenuUpdate();
+  });
   return grid;
 }
 
