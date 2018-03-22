@@ -1,3 +1,7 @@
+@statusbar_size: 38px;
+@sb_panel_size: @statusbar_size - 14px;
+@sb_font_size: @sb_panel_size - 8px;
+
 *{
   margin: 0;
   padding: 0;
@@ -24,6 +28,7 @@ div#toast {
 }
 div#container {
   margin: 16px;
+  height: calc(~"100vh - " @statusbar_size * 2);
 }
 
 div#editorui {
@@ -46,36 +51,29 @@ div#editorui {
   }
 }
 
-/* Aggregates */
+/* StatisBar */
 
-#aggregates {
-  position: fixed;
+footer#statusbar {
+  position: absolute;
   width: 100%;
-  bottom: 0;
-  margin: 0;
-  > h1 {
-    font-size: 18px;
-    margin: 0;
-    padding: 4px 8px;
-    > a {
-      display: block;
-      width: 100%;
-      text-decoration: none;
+  height: @statusbar_size;
+  border: 1px ridge buttonshadow;
+  bottom: 0px;
+  div {
+    border: 1px ridge buttonshadow;
+    height: @sb_panel_size;
+    margin: 2px;
+    padding: 4px;
+    font-size: @sb_font_size;
+    float: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    &#sb_status {
+      width: calc(~"100% - 180px");
     }
-  }
-  section {
-    margin: 4px 12px;
-    h2 {
-      font-size: 16px;
-      font-weight: bolder;
-      display: inline;
-    }
-    dl, dt, dd {
-      margin: 0;
-      display: inline;
-    }
-    dd{
-      font-size: smaller;
+    &#sb_aggregates {
+      width: 152px;
     }
   }
 }

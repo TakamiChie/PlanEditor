@@ -568,36 +568,20 @@ function aggregates() {
   }
 
   console.log(aggregate);
-  var aggregates_fields = document.querySelector("#aggregates_fields");
-  aggregates_fields.innerHTML = "";
+  let status = "";
+  let hint = "";
   Object.keys(aggregate).forEach((a, i) => {
-    let section = document.createElement("section");
-    let title = document.createElement("h2");
-    let dl = document.createElement("dl");
-    let dt = document.createElement("dt");
-    let dd = document.createElement("dd");
-    section.appendChild(title);
-    section.appendChild(dl);
-    title.textContent = a;
-    dt.textContent = "合計";
-    dd.textContent = aggregate[a].TOTAL;
-    dd.className = "label label-primary";
-    dl.appendChild(dt);
-    dl.appendChild(dd);
-    // 担当者別集計を列挙
+    status += `${a}: ${aggregate[a].TOTAL}`;
+    hint += `${a}: ${aggregate[a].TOTAL}\n`; 
     Object.keys(aggregate[a]).forEach((key) => {
       if(key.charAt(0) == "e"){
-        let dt = document.createElement("dt");
-        let dd = document.createElement("dd");
-        dt.textContent = key.substring(1);
-        dd.textContent = aggregate[a][key];
-        dl.appendChild(dt);
-        dl.appendChild(dd);
-        dd.className = "label label-info";
+        hint += `  ${key.substring(1)}: ${aggregate[a][key]}\n`;
       }
     });
-    aggregates_fields.appendChild(section);
   });
+  var aggregates_fields = document.querySelector("#sb_aggregates");
+  aggregates_fields.textContent = status;
+  aggregates_fields.title = hint;
 
   console.log(`aggregate finished ${new Date().getTime() - start} ms`);
 }
@@ -723,20 +707,5 @@ function init(){
     resetHeaderRow(editorui);
   });
 }
-
-/**
- * 画面リサイズ時に、Containerをリサイズする
- */
-function resizeObject() {
-  let hsize = $(window).height();
-  let fsize = $("footer").height() * 2;
-  $("#container").css("height", (hsize - fsize) + "px");
-}
-$(document).ready(() => {
-  resizeObject();
-});
-$(window).resize(() => {
-  resizeObject();
-});
 
 init();
