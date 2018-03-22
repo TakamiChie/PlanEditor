@@ -634,20 +634,6 @@ function init(){
 }
 
 /**
- * セルの変更が行われた際に呼び出されるイベントハンドラ
- * @param {EventTarget} e イベント発生源を示すEventTarget
- */
-function cells_onblur(e){
-  if(e.target.dataset.role == ROLE.CHAPTER){
-    renumber();
-  }
-  if(e.target.dataset.role == ROLE.AGGREGATE){
-    aggregates();
-  }
-
-}
-
-/**
  * 画面リサイズ時に、Containerをリサイズする
  */
 function resizeObject() {
