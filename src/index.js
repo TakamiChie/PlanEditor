@@ -518,7 +518,7 @@ function renumber() {
   for (let i = 0; i < tabledata.length; i++) {
     // カレント行の章題取得
     indexes.forEach((item, index) => {
-      ccur[index] = (tabledata[i][item] + "").trim();
+      ccur[index] = (tabledata[i][item] || "").trim();
     });
     // 前の行と変わった題名の箇所は？(空白は上と同じとみなす)
     for (let l = 0; l < indexes.length; l++) {
