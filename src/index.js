@@ -58,11 +58,11 @@ let openedFileName;
 var grid;
 var tabledata = [];
 
-require("electron").ipcRenderer.on("fileOpen", (e, arg) => {
+ipc.on("fileOpen", (e, arg) => {
   menuop_fileOpen(arg);
 });
 
-require("electron").ipcRenderer.on("fileSave", (e, args) => {
+ipc.on("fileSave", (e, args) => {
   if(args.saveas){
     menuop_fileSaveAs(args);
   }else{
@@ -70,11 +70,11 @@ require("electron").ipcRenderer.on("fileSave", (e, args) => {
   }
 });
 
-require("electron").ipcRenderer.on("fileClose", (e) => {
+ipc.on("fileClose", (e) => {
   menuop_fileClose();
 });
 
-require("electron").ipcRenderer.on("appendColumn", (e) => {
+ipc.on("appendColumn", (e) => {
   menuop_append_column();
 });
 
