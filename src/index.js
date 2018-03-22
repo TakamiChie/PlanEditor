@@ -662,6 +662,14 @@ function toast(message, type ="info") {
 }
 
 /**
+ * ステータスバーに文字列を設定する
+ * @param {*} text ステータスバーに表示する値
+ */
+function setStatus(text) {
+  document.querySelector("#sb_status").textContent = text.toString();
+}
+
+/**
  * 初期化
  */
 function init(){

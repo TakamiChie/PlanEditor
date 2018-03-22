@@ -100,6 +100,11 @@ function createSlickGrid(columns) {
     }
   })
   grid.onActiveCellChanged.subscribe((e, args) => {
+    if(grid.getCellNode(args.row, args.cell) != null){
+      setStatus(grid.getCellNode(args.row, args.cell).textContent);
+    }else{
+      setStatus("");
+    }
     cellMenuUpdate();
   });
   return grid;
