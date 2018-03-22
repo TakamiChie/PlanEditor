@@ -1,9 +1,15 @@
 // ref:https://github.com/theodi/comma-chameleon/blob/master/main/menu.js
+
+const defClickAction = (item, window, event) => {
+  window.webContents.send(item.id);
+}
+
 exports.menu = [
   {
     label: "ファイル(&F)",
     submenu: [
       {
+        id: "fileOpen",
         label: "ファイルを開く(&O)",
         accelerator: "CmdOrCtrl+O",
         click: function() {
@@ -13,6 +19,7 @@ exports.menu = [
         }
       },
       {
+        id: "fileSave",
         label: "上書き保存(&S)",
         accelerator: "CmdOrCtrl+S",
         click: function() {
@@ -23,6 +30,7 @@ exports.menu = [
         }
       },
       {
+        id: "fileSaveAs",
         label: "名前を付けて保存(&S)",
         click: function() {
           BrowserWindow.getFocusedWindow().webContents.send("fileSave", {
@@ -32,10 +40,9 @@ exports.menu = [
         }
       },
       {
+        id: "fileClose",
         label: "ファイルを閉じる(&C)",
-        click: function() {
-          BrowserWindow.getFocusedWindow().webContents.send("fileClose"); 
-        }
+        click: defClickAction
       },
       {
         type: "separator"
@@ -50,8 +57,9 @@ exports.menu = [
     label: "計画(&P)",
     submenu: [
       {
+        id: "appendColumn",
         label: "列の追加(&C)",
-        click: function() { BrowserWindow.getFocusedWindow().webContents.send("appendColumn"); }
+        click: defClickAction,
       },
       {
         type: "separator"
@@ -59,21 +67,21 @@ exports.menu = [
       {
         id: "columnMoveToLeft",
         label: "列を左へ移動(&L)",
-        click: function() { BrowserWindow.getFocusedWindow().webContents.send("columnMoveToLeft"); },
+        click: defClickAction,
         accelerator: "CmdOrCtrl+Alt+Left",
         enabled: false
       },
       {
         id: "columnMoveToRight",
         label: "列を右へ移動(&R)",
-        click: function() { BrowserWindow.getFocusedWindow().webContents.send("columnMoveToRight"); },
+        click: defClickAction,
         accelerator: "CmdOrCtrl+Alt+Right",
         enabled: false
       },
       {
         id: "columnRemove",
         label: "列を削除(&M)",
-        click: function() { BrowserWindow.getFocusedWindow().webContents.send("columnRemove"); },
+        click: defClickAction,
         accelerator: "CmdOrCtrl+Delete",
         enabled: false
       },
@@ -83,21 +91,21 @@ exports.menu = [
       {
         id: "rowMoveToUpper",
         label: "行を上へ移動(&U)",
-        click: function() { BrowserWindow.getFocusedWindow().webContents.send("rowMoveToUpper"); },
+        click: defClickAction,
         accelerator: "CmdOrCtrl+Alt+Up",
         enabled: false
       },
       {
         id: "rowMoveToLower",
         label: "行を下へ移動(&W)",
-        click: function() { BrowserWindow.getFocusedWindow().webContents.send("rowMoveToLower"); },
+        click: defClickAction,
         accelerator: "CmdOrCtrl+Alt+Down",
         enabled: false
       },
       {
         id: "rowRemove",
         label: "行を削除(&V)",
-        click: function() { BrowserWindow.getFocusedWindow().webContents.send("rowRemove"); },
+        click: defClickAction,
         accelerator: "CmdOrCtrl+Shift+Delete",
         enabled: false
       },
@@ -107,6 +115,7 @@ exports.menu = [
     label: "ヘルプ(&H)",
     submenu: [
       {
+        id: "toggleDevTools",
         label: "開発者ツール(&D)",
         accelerator: "CmdOrCtrl+Shift+I",
         click: function() { BrowserWindow.getFocusedWindow().toggleDevTools(); }
