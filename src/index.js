@@ -520,9 +520,9 @@ function renumber() {
     indexes.forEach((item, index) => {
       ccur[index] = (tabledata[i][item] + "").trim();
     });
-    // 前の行と変わった題名の箇所は？
+    // 前の行と変わった題名の箇所は？(空白は上と同じとみなす)
     for (let l = 0; l < indexes.length; l++) {
-      if(cprev[l] != ccur[l]){
+      if(ccur[l] && cprev[l] != ccur[l]){
         no[l] += 1;
         no.fill(1, l + 1);
         break;
