@@ -574,7 +574,7 @@ function aggregates() {
     status += `${a}: ${aggregate[a].TOTAL}`;
     hint += `${a}: ${aggregate[a].TOTAL}\n`; 
     Object.keys(aggregate[a]).forEach((key) => {
-      if(key.charAt(0) == "e"){
+      if(key.charAt(0) == "e" && key.length > 1){
         hint += `  ${key.substring(1)}: ${aggregate[a][key]}\n`;
       }
     });
