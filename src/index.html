@@ -4,16 +4,15 @@
   <meta charset="UTF-8">
   <link rel="stylesheet" type="text/css" href="index.css">
   <link rel="stylesheet" href="../node_modules/bootstrap-honoka/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../node_modules/slickgrid/slick.grid.css" type="text/css"/>
+  <link rel="stylesheet" href="../node_modules/slickgrid/slick-default-theme.css" type="text/css"/>
+  <link rel="stylesheet" href="../node_modules/slickgrid/css/smoothness/jquery-ui-1.11.3.custom.css" type="text/css"/>
   <title>Plan Editor</title>
 </head>
 <body>
   <div id="toast" class="alert"></div>
   <div id="container">
-    <table id="editorui">
-      <tr>
-        <td class="pushable"><button class="btn btn-primary" id="appendrow">行を追加</button></td>
-      </tr>
-    </table>
+    <div id="editorui"></div>
   </div>
   <footer id="aggregates" class="panel panel-info">
     <h1 class="panel-heading"><a data-toggle="collapse" data-parent="#aggregates_fields" href="#aggregates_fields">集計</a></h1>
@@ -40,66 +39,20 @@
     </form>
   </dialog>
 
-  <dialog id="dlg-colmenu">
-    <div class="btn-group">
-      <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-        <span class="text"></span>
-        <span class="caret"></span>
-      </button>
-      <ul class="dropdown-menu" role="menu">
-        <li role="presentation">
-          <a role="menuitem" tabindex="-1" href="#" data-role="-">
-            <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
-            左へ
-          </a>
-        </li>
-        <li role="presentation">
-          <a role="menuitem" tabindex="-1" href="#" data-role="+">
-            <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
-            右へ
-          </a>
-        </li>
-        <li role="presentation">
-          <a role="menuitem" tabindex="-1" href="#" data-role="x">
-            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-            削除
-          </a>
-        </li>
-      </ul>
-    </div>
-  </dialog>
-
-  <dialog id="dlg-rowmenu">
-    <div class="btn-group">
-      <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-        <span class="text"></span>
-        <span class="caret"></span>
-      </button>
-      <ul class="dropdown-menu" role="menu">
-        <li role="presentation">
-          <a role="menuitem" tabindex="-1" href="#" data-role="-">
-            <span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span>
-            上へ
-          </a>
-        </li>
-        <li role="presentation">
-          <a role="menuitem" tabindex="-1" href="#" data-role="+">
-            <span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span>
-            下へ
-          </a>
-        </li>
-        <li role="presentation">
-          <a role="menuitem" tabindex="-1" href="#" data-role="x">
-            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-            削除
-          </a>
-        </li>
-      </ul>
-    </div>
-  </dialog>
-
   <script src="loadjquery.js"></script>
   <script src="../node_modules/bootstrap-honoka/dist/js/bootstrap.js"></script>
+  <script src="../node_modules/slickgrid/slick.core.js"></script>
+  <script src="../node_modules/slickgrid/lib/jquery.event.drag-2.3.0.js"></script>
+  <script src="../node_modules/slickgrid/lib/jquery-ui-1.11.3.js"></script>
+  <script src="../node_modules/slickgrid/slick.grid.js"></script>
+  <script src="../node_modules/slickgrid/slick.editors.js"></script>
+  <script src="../node_modules/slickgrid/slick.formatters.js"></script>
+  <script src="../node_modules/slickgrid/plugins/slick.cellrangedecorator.js"></script>
+  <script src="../node_modules/slickgrid/plugins/slick.rowmovemanager.js"></script>
+  <script src="../node_modules/slickgrid/plugins/slick.rowselectionmodel.js"></script>
+  <script src="../node_modules/slickgrid/plugins/slick.cellrangeselector.js"></script>
+  <script src="../node_modules/slickgrid/plugins/slick.cellselectionmodel.js"></script>
+  <script src="slickgrid.js"></script>
   <script src="index.js"></script>
 </body>
 </html>

@@ -47,6 +47,7 @@ const def_filters = [{
   extensions: ['pln']
 }]
 const electron = require('electron');
+const ipc = electron.ipcRenderer;
 const remote = electron.remote;
 const BrowserWindow = remote.BrowserWindow;
 const dialog = remote.dialog;
@@ -54,6 +55,8 @@ const path = require('path');
 
 let settings;
 let openedFileName;
+var grid;
+var tabledata = [];
 
 require("electron").ipcRenderer.on("fileOpen", (e, arg) => {
   menuop_fileOpen(arg);
@@ -73,6 +76,34 @@ require("electron").ipcRenderer.on("fileClose", (e) => {
 
 require("electron").ipcRenderer.on("appendColumn", (e) => {
   menuop_append_column();
+});
+
+ipc.on("columnMoveToLeft", (e) => {
+  menuop_move_column(-1);
+});
+
+ipc.on("columnMoveToRight", (e) => {
+  menuop_move_column(1);
+});
+
+ipc.on("columnRemove", (e) => {
+  if(confirm(settings.rows[grid.getActiveCell().row].name + "を削除しますか？")){
+    removeColumn(grid.getActiveCell().cell);
+  }
+});
+
+ipc.on("rowMoveToUpper", (e) => {
+  menuop_move_row(-1);
+});
+
+ipc.on("rowMoveToLower", (e) => {
+  menuop_move_row(1);
+});
+
+ipc.on("rowRemove", (e) => {
+  if(confirm(tabledata[grid.getActiveCell().row]["項番"] + "を削除しますか？")){
+    removeRow(grid.getActiveCell().row);
+  }  
 });
 
 //////////// メニュー用メソッド //////////////
@@ -148,34 +179,35 @@ function menuop_append_column() {
   showColumnDialog(true).then((value) => {
     // 設定値更新
     settings.rows.push({name: value.name, role: value.role});
-    let editorui = getEditorUI();
-    let rows = editorui.rows;
-    // セルの追加
-    for (let i = 0; i < rows.length - 1; i++) {
-      if(i == 0){
-        // ヘッダ行
-        createCell({
-          rowobject: rows.item(i),
-          value: value.name,
-          role: value.role,
-          insertIndex: -1,
-          header: true
-        });
-      }else{
-        // データ行
-        createCell({
-          rowobject: rows.item(i),
-          role: value.role,
-          insertIndex: -1,
-        });        
-      }
-    }
-    lastRowUpdate();
+    resetHeaderRow(getEditorUI());
     renumber();
     aggregates();
     saveSettings();
   });
 }
+
+/**
+ * 列を移動する
+ * @param {number} direction 移動方向。1または-1
+ */
+function menuop_move_column(direction) {
+  let i = grid.getActiveCell();
+  let a = swapColumn(i.cell, i.cell + direction);
+  grid.setActiveCell(i.row, a[1]);
+  renumber();
+}
+
+/**
+ * 行を移動する
+ * @param {number} direction 移動方向。1または-1
+ */
+function menuop_move_row(direction){
+  let i = grid.getActiveCell();
+  let a = swapRow(i.row, i.row + direction);
+  grid.setActiveCell(a[1], i.cell);
+  renumber();
+}
+
 //////////// 各種メソッド //////////////
 
 /**
@@ -203,23 +235,23 @@ function fileOpen(fileName) {
 
         // テーブルデータ読み込み
         let table = loadData.data;
+        tabledata = [];
         table.forEach(rowdata => {
-          var row = editorui.insertRow(editorui.rows.length - 1);
+          var row = {}
           settings.rows.forEach(r => {
-            createCell({
-              rowobject: row,
-              insertIndex: -1,
-              role: r.role,
-              value: rowdata[r.name] ? rowdata[r.name] : "",
-              header: false
-            });
+            if(r.name != "項番"){
+              row[r.name] = rowdata[r.name];
+            }
           });
+          tabledata.push(row);
         });
+        redrawGrid(undefined, () => { grid.setData(tabledata)})
         setOpenedFileName(fileName);
         toast(`${path.basename(fileName)}を読み込みました。`);
         console.log("Open Finished");
         renumber();
         aggregates();
+        cellMenuUpdate();
       }else{
         alert("ファイルが読み込めません。ファイルが破損している可能性があります。");
       }
@@ -237,16 +269,14 @@ function fileSave(fileName){
   let editorui = getEditorUI();
   serialize["filever"] = FILEVERSION;
   serialize["rows"] = settings.rows;
-  var rows = editorui.rows;
-  var tabledata = [];
-  for (var i = 1; i < rows.length - 1; i++) {
-    var rowdata = {};
-    for (let l = 0; l < rows[i].cells.length; l++) {
-      rowdata[settings.rows[l].name] = rows[i].cells[l].textContent;
-    }
-    tabledata.push(rowdata);
-  }
-  serialize["data"] = tabledata;
+  serialize["data"] = [];
+  tabledata.forEach((data) => {
+    let rowdata = {}
+    settings.rows.forEach(c => {
+      rowdata[c.name] = (data[c.name] || "");
+    });
+    serialize["data"].push(rowdata);
+  });
   const fs = require("fs");
   const yaml = require("js-yaml");
   fs.writeFile(fileName, yaml.safeDump(serialize), "utf8", (err) => {
@@ -261,12 +291,16 @@ function fileSave(fileName){
   });
 }
 
+/**
+ * ファイルを閉じる
+ */
 function fileClose(){
-  let editorui = getEditorUI();
-  while(editorui.rows.length > 2){
-    editorui.deleteRow(1);
-  }
+  redrawGrid(undefined, () => { 
+    tabledata = [];
+    grid.setData(tabledata, true);
+  });
   setOpenedFileName("");
+  cellMenuUpdate();
 }
 
 /**
@@ -283,127 +317,57 @@ function setOpenedFileName(newFileName){
 }
 
 /**
- * エディタUIを取得
- * @return エディタUIを示すHTMLTableElement
+ * カラム/行操作系メニューのEnabledを切り替える
+ * @param {boolean} column 列操作系メニューのEnabledを切り替える
+ * @param {boolean} row 行操作系メニューのEnabledを切り替える
  */
-function getEditorUI(){
-  return document.querySelector("#editorui");
+function cellMenuUpdate(column = true, row = true) {
+  if(column){ ipc.send("column_menu_state", settings.rows.length > 2); }
+  if(row){ ipc.send("row_menu_state", tabledata.length > 1); }
 }
-
-/**
- * セルを追加する
- * @param {HTMLRowObject} rowobject 行を示すオブジェクト
- * @param {number} insertindex セルを追加するインデックス。省略時-1
- * @param {ROLE} role セルのロール。省略時ROLE.STATIC
- * @param {string} value セルの値。省略時は空文字列
- * @param {boolean} header セルはヘッダセルかどうか。省略時false
- */
-function createCell({
-  rowobject, 
-  insertIndex = -1,
-  role = ROLE.STATIC,
-  value = "",
-  header = false
-} = {}){
-  if(rowobject == undefined){
-    throw new Error("Argument `rowobject` is not defined");
-  }
-  let cell;
-  if(header){
-    cell = document.createElement("th");
-    if(role == ROLE.STATIC){
-      // 編集・移動を一切行わない
-      cell.textContent = value;
-    }else{
-      // 編集・移動可能
-      let colmenu = document.querySelector("#dlg-colmenu");
-      cell.innerHTML = colmenu.innerHTML;
-      cell.querySelector(".text").textContent = value;
-      resetEventHandler(cell, colmenu_onclick);
-    }
-    if(insertIndex == -1){
-      rowobject.appendChild( cell );
-    }else{
-      rowobject.insertBefore( cell, rowobject.rows[insertIndex] );
-    }
-  }else{
-    cell = rowobject.insertCell(insertIndex);
-  }
-  if(role == ROLE.STATIC && !header){
-    // セルは項番セル・編集・移動可能
-    let rowmenu = document.querySelector("#dlg-rowmenu");
-    cell.innerHTML = rowmenu.innerHTML;
-    cell.querySelector(".text").textContent = value;
-    resetEventHandler(cell, rowmenu_onclick);
-  }
-  if(role == ROLE.STATIC || header){
-    // セルはラベル
-    cell.contentEditable = false;
-    cell.dataset.role = role;
-  }else{
-    // セルは編集可能
-    cell.contentEditable = true;
-    cell.className = "editable";
-    cell.addEventListener("blur", cells_onblur);
-    cell.dataset.role = role;
-    cell.textContent = value;
-  }
-  return cell;
-}
-
-/**
- * セルのメニューにイベントハンドラを再セットする
- * @description swapColumn実施後、イベントハンドラが消えることがあるため再設定する
- * @param {HTMLTableCellElement} cell セルオブジェクト
- * @param {EventHandler} eventHandler イベントハンドラ
- */
-function resetEventHandler(cell, eventHandler) {
-  cell.querySelectorAll(".dropdown-menu > li").forEach((i) => {
-    let a = i.querySelector("a");
-    a.removeEventListener("click", eventHandler);
-    a.addEventListener("click", eventHandler);
-  });
-}
-
 /**
  * 行を並び替える
  * @param {number} srcIndex 並び替え元の行インデックス
  * @param {number} dstIndex 並び替え先の行インデックス
  */
 function swapRow(srcIndex, dstIndex){
-  console.log(`swapRow(${srcIndex}, ${dstIndex})`);
-  let editorui = getEditorUI();
-  if(1 > srcIndex || srcIndex >= editorui.rows.length - 1){
-    throw "Range Error At srcIndex";
-  }
-  if(1 > dstIndex || dstIndex >= editorui.rows.length - 1){
-    throw "Range Error At dstIndex";
-  }
   if(srcIndex == dstIndex){
     throw "Index is Same";
   }
-  // セルの並び替え
-  let rows = editorui.rows;
-  var src = rows[srcIndex];
-  var dst = rows[dstIndex];
-  var srcC = src.cloneNode(true);
-  var dstC = dst.cloneNode(true);
-  src.parentNode.replaceChild( dstC, src );
-  dst.parentNode.replaceChild( srcC, dst );
-  resetEventHandler(srcC.cells[0], rowmenu_onclick);
-  resetEventHandler(dstC.cells[0], rowmenu_onclick);
+  let sd = [srcIndex, dstIndex];
+  for (let i = 0; i < sd.length; i++) {
+    if(sd[i] > tabledata.length - 1){
+      sd[i] = 0;
+    }
+    if(sd[i] < 0){
+      sd[i] = tabledata.length - 1;
+    }
+  };
+  srcIndex = sd[0];
+  dstIndex = sd[1];
+  console.log(`swapRow(${srcIndex}, ${dstIndex})`);
+  redrawGrid([srcIndex,dstIndex], () => {
+    var src = tabledata[srcIndex];
+    var dst = tabledata[dstIndex];
+    tabledata[dstIndex] = src;
+    tabledata[srcIndex] = dst;
+    grid.setData(tabledata, false);
+  });
+  renumber();
+  return [srcIndex, dstIndex];
 }
 
 /**
  * 行を削除する
- * @param {number} index 削除する行の行インデックス
+ * @param {number} index 削除する行のインデックス 
  */
 function removeRow(index){
-  let editorui = getEditorUI();
-  if(1 > index || index >= editorui.rows.length - 1){
+  if(1 > index || index >= settings.rows.length){
     throw "Range Error At index";
   }
-  getEditorUI().deleteRow(index);
+  redrawGrid(undefined, () => {
+    tabledata.splice(index, 1);
+  })
   renumber();
   aggregates();
 }
@@ -412,38 +376,31 @@ function removeRow(index){
  * 列を並び替える
  * @param {number} srcIndex 並び替え元の列インデックス
  * @param {number} dstIndex 並び替え先の列インデックス
+ * @returns {array} 実際に並び替えた列のインデックス
  */
 function swapColumn(srcIndex, dstIndex){
-  console.log(`swapColumn(${srcIndex}, ${dstIndex})`);
-  if(1 > srcIndex || srcIndex >= settings.rows.length){
-    throw "Range Error At srcIndex";
-  }
-  if(1 > dstIndex || dstIndex >= settings.rows.length){
-    throw "Range Error At dstIndex";
-  }
   if(srcIndex == dstIndex){
     throw "Index is Same";
   }
+  let sd = [srcIndex, dstIndex];
+  for (let i = 0; i < sd.length; i++) {
+    if(sd[i] > settings.rows.length - 1){
+      sd[i] = 1;
+    }
+    if(sd[i] < 1){
+      sd[i] = settings.rows.length - 1;
+    }
+  };
+  srcIndex = sd[0];
+  dstIndex = sd[1];
+  console.log(`swapColumn(${srcIndex}, ${dstIndex})`);
   // 設定値の並び替え
   var tmp = settings.rows[srcIndex];
   settings.rows[srcIndex] = settings.rows[dstIndex];
   settings.rows[dstIndex] = tmp;
-  // セルの並び替え
-  let editorui = getEditorUI();
-  let rows = editorui.rows;
-  for (let i = 0; i < rows.length - 1; i++) {
-    var src = rows[i].cells[srcIndex];
-    var dst = rows[i].cells[dstIndex];
-    var srcC = src.cloneNode(true);
-    var dstC = dst.cloneNode(true);
-    src.parentNode.replaceChild( dstC, src );
-    dst.parentNode.replaceChild( srcC, dst );
-    if(i == 0){
-      resetEventHandler(srcC, colmenu_onclick);
-      resetEventHandler(dstC, colmenu_onclick);
-    }
-  }
+  resetHeaderRow(getEditorUI());
   saveSettings();
+  return [srcIndex, dstIndex];
 }
 
 /**
@@ -455,11 +412,7 @@ function removeColumn(index){
     throw "Range Error At index";
   }
   settings.rows.splice(index, 1);
-  let editorui = getEditorUI();
-  let rows = editorui.rows;
-  for (let i = 0; i < rows.length - 1; i++) {
-    rows[i].deleteCell( index );
-  }
+  resetHeaderRow(getEditorUI());
   saveSettings();
 }
 
@@ -530,14 +483,6 @@ function showColumnDialog(append = false, name = "", role = ROLE.CHAPTER){
 }
 
 /**
- * 最後の行（行の追加ボタン）のサイズを更新する
- */
-function lastRowUpdate(){
-  let editorui = getEditorUI();
-  // 最終行の列数追加
-  editorui.rows[editorui.rows.length - 1].cells[0].colSpan = settings.rows.length;
-}
-/**
  *  設定値を直ちに保存する
  */
 function saveSettings(){
@@ -561,21 +506,20 @@ function renumber() {
   var indexes = [];
   var cprev;
   var ccur;
-  for (let i = 0; i < settings.rows.length; i++) {
-    if(settings.rows[i].role == ROLE.CHAPTER){
-      indexes.push(i);
+  settings.rows.forEach((r) => {
+    if(r.role == ROLE.CHAPTER){
+      indexes.push(r.name);
       no.push(0);
     }
-  }
+  })
   cprev = Array.from(no);
   ccur = Array.from(no);
   // 採番処理の開始
-  var editorui = getEditorUI();
-  for (let i = 1; i < editorui.rows.length - 1; i++) {
+  for (let i = 0; i < tabledata.length; i++) {
     // カレント行の章題取得
-    for (let l = 0; l < indexes.length; l++) {
-      ccur[l] = editorui.rows[i].cells[indexes[l]].textContent.trim();
-    }
+    indexes.forEach((item, index) => {
+      ccur[index] = (tabledata[i][item] + "").trim();
+    });
     // 前の行と変わった題名の箇所は？
     for (let l = 0; l < indexes.length; l++) {
       if(cprev[l] != ccur[l]){
@@ -586,8 +530,9 @@ function renumber() {
     }
     cprev = Array.from(ccur);
     let num = no.join("-");
-    editorui.rows[i].cells[0].querySelector(".text").textContent = num;
+    tabledata[i]["項番"] = num;
   }
+  redrawGrid();
   
   console.log(`renumber finished ${new Date().getTime() - start} ms`);
 }
@@ -599,38 +544,33 @@ function aggregates() {
   var start = new Date().getTime(); 
   console.log("aggregate started");
   // 集計配列の作成
-  var aggregate = [];
-  var indexes = [];
+  var aggregate = {};
   var charge = undefined;
-  for (let i = 0; i < settings.rows.length; i++) {
-    if(settings.rows[i].role == ROLE.AGGREGATE){
-      aggregate.push({TOTAL:0});
-      indexes.push(i);
+  settings.rows.forEach((r) => {
+    if(r.role == ROLE.AGGREGATE){
+      aggregate[r.name] = {TOTAL:0};
     }
-    if(settings.rows[i].role == ROLE.CHARGE){
-      charge = i;
+    if(r.role == ROLE.CHARGE){
+      charge = r.name;
     }
-  }
+  })
   // 集計処理の開始
-  var editorui = getEditorUI();
-  for (let i = 1; i < editorui.rows.length - 1; i++) {
-    for (let l = 0; l < indexes.length; l++) {
-      let c = parseFloat(editorui.rows[i].cells[indexes[l]].textContent);
+  for (let i = 0; i < tabledata.length; i++) {
+    Object.keys(aggregate).forEach((a) => {
+      let c = parseFloat(tabledata[i][a]);
       cn = isNaN(c) ? 0 : c;
-      aggregate[l].TOTAL += cn;
+      aggregate[a].TOTAL += cn;
       if(charge != undefined){
-        if(aggregate[l]["e"+editorui.rows[i].cells[charge].textContent] == undefined){
-          aggregate[l]["e"+editorui.rows[i].cells[charge].textContent] = 0;
-        }
-        aggregate[l]["e"+editorui.rows[i].cells[charge].textContent] += cn;
+        let name = "e" + tabledata[i][charge];
+        aggregate[a][name] = (aggregate[a][name] || 0) + cn;
       }
-    }
+    })
   }
 
   console.log(aggregate);
   var aggregates_fields = document.querySelector("#aggregates_fields");
   aggregates_fields.innerHTML = "";
-  aggregate.forEach((a, i) => {
+  Object.keys(aggregate).forEach((a, i) => {
     let section = document.createElement("section");
     let title = document.createElement("h2");
     let dl = document.createElement("dl");
@@ -638,25 +578,24 @@ function aggregates() {
     let dd = document.createElement("dd");
     section.appendChild(title);
     section.appendChild(dl);
-    title.textContent = settings.rows[indexes[i]].name;
+    title.textContent = a;
     dt.textContent = "合計";
-    dd.textContent = a.TOTAL;
+    dd.textContent = aggregate[a].TOTAL;
     dd.className = "label label-primary";
     dl.appendChild(dt);
     dl.appendChild(dd);
     // 担当者別集計を列挙
-    for (const key in a) {
-      if (a.hasOwnProperty(key) && key.charAt(0) == "e") {
-        const element = a[key];
+    Object.keys(aggregate[a]).forEach((key) => {
+      if(key.charAt(0) == "e"){
         let dt = document.createElement("dt");
         let dd = document.createElement("dd");
         dt.textContent = key.substring(1);
-        dd.textContent = a[key];
+        dd.textContent = aggregate[a][key];
         dl.appendChild(dt);
         dl.appendChild(dd);
         dd.className = "label label-info";
       }
-    }
+    });
     aggregates_fields.appendChild(section);
   });
 
@@ -664,24 +603,58 @@ function aggregates() {
 }
 
 /**
- * ヘッダ行を削除し再生成する
- * @param {HTMLTableElement} editorui テーブルオブジェクト
+ * ヘッダ行を再設定する
+ * @param {HTMLElement} editorui テーブルオブジェクト
  */
 function resetHeaderRow(editorui) {
-  if(editorui.rows.length > 1){
-    editorui.deleteRow(0);
-  }
-  var row = editorui.insertRow(0);
-  settings.rows.forEach(r => {
-    createCell({
-      rowobject: row,
-      insertIndex: -1,
-      role: r.role,
-      value: r.name,
-      header: true
-    })
+  var columns = [];
+  settings.rows.forEach((r, i) => {
+    var column = {}; 
+    column.id = r.name;
+    column.name = r.name;
+    column.field = r.name;
+    column.cssClass = "role_" + r.role.toLowerCase();
+    switch (r.role) {
+      case ROLE.STATIC:
+        column.focusable = false;
+        column.sortable = true;
+        column.behavior = "selectAndMove";
+        column.toolTip = "行のダブルクリックで行を削除します";
+        break;
+      case ROLE.CHAPTER:
+        column.sortable = true;
+        column.editor = Slick.Editors.Text;
+        break;
+      case ROLE.AGGREGATE:
+        column.sortable = true;
+        column.editor = Slick.Editors.Text;
+        break;
+      case ROLE.CHARGE:
+        column.sortable = true;
+        column.editor = Slick.Editors.Text;
+        break;
+      case ROLE.TEXT:
+        column.editor = Slick.Editors.LongText;
+        break;
+      case ROLE.NUMBER:
+        column.sortable = true;
+        column.editor = Slick.Editors.Integer;
+        break;
+      case ROLE.DATE:
+        column.sortable = true;
+        column.editor = Slick.Editors.Date;
+        break;
+      default:
+        throw `Invalid Role At ${r.name}`;
+        break;
+    }
+    columns.push(column);
   });
-  lastRowUpdate();
+  if(grid != undefined){
+    grid.setColumns(columns);
+  }else{
+    grid = createSlickGrid(columns); 
+  }
 }
 
 /**
@@ -752,104 +725,18 @@ function init(){
 }
 
 /**
- * 行ヘッダメニューのイベントハンドラ
- * @param {EventArgs} event
+ * 画面リサイズ時に、Containerをリサイズする
  */
-function rowmenu_onclick(event){
-  let editorui = getEditorUI();
-  let a = event.target.nodeName == "A" ? event.target : event.target.parentNode;
-  var rowid = a.parentNode.parentNode.parentNode.parentNode.parentNode.rowIndex;
-  var toid;
-  let action = a.dataset.role;
-  switch (action) {
-    case "+":
-      toid = rowid + 1;
-      if(toid >= editorui.rows.length - 1){
-        toid = 1;
-      }
-      swapRow(rowid, toid);
-      break;
-    case "-":
-      toid = rowid - 1;
-      if(toid <= 0){
-        toid = editorui.rows.length - 2;
-      }
-      swapRow(rowid, toid);
-      break;
-    case "x":
-      if(confirm("行を削除してもよろしいですか？")){
-        removeRow(rowid);
-      }
-      break;
-    default:
-      throw "unknown method";
-      break;
-  }
+function resizeObject() {
+  let hsize = $(window).height();
+  let fsize = $("footer").height() * 2;
+  $("#container").css("height", (hsize - fsize) + "px");
 }
-
-/**
- * 列ヘッダメニューのイベントハンドラ
- * @param {EventArgs} event イベント発生時のオブジェクトを示す
- */
-function colmenu_onclick(event){
-  let editorui = getEditorUI();
-  let rowobject = editorui.rows[0];
-  let a = event.target.nodeName == "A" ? event.target : event.target.parentNode;
-  var colid = a.parentNode.parentNode.parentNode.parentNode.cellIndex;
-  var toid;
-  let action = a.dataset.role;
-  switch (action) {
-    case "+":
-      toid = colid + 1;
-      if(toid >= rowobject.cells.length){
-        toid = 1;
-      }
-      swapColumn(colid, toid);
-      break;
-    case "-":
-      toid = colid - 1;
-      if(toid <= 0){
-        toid = rowobject.cells.length;
-      }
-      swapColumn(colid, toid);
-      break;
-    case "x":
-      if(confirm("列を削除してもよろしいですか？")){
-        removeColumn(colid);
-      }
-      break;
-    default:
-      throw "unknown method";
-      break;
-  }
-}
-
-/**
- * セルの変更が行われた際に呼び出されるイベントハンドラ
- * @param {EventTarget} e イベント発生源を示すEventTarget
- */
-function cells_onblur(e){
-  if(e.target.dataset.role == ROLE.CHAPTER){
-    renumber();
-  }
-  if(e.target.dataset.role == ROLE.AGGREGATE){
-    aggregates();
-  }
-
-}
-
-document.querySelector("#appendrow").addEventListener("click", () =>{
-  let editorui = getEditorUI();
-  let row = editorui.insertRow(editorui.rows.length - 1);
-  settings.rows.forEach(r => {
-    createCell({
-      rowobject: row,
-      insertIndex: -1,
-      role: r.role,
-      value: "",
-    });
-  });
-  renumber();
+$(document).ready(() => {
+  resizeObject();
+});
+$(window).resize(() => {
+  resizeObject();
 });
 
 init();

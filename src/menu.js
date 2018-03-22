@@ -52,7 +52,55 @@ exports.menu = [
       {
         label: "列の追加(&C)",
         click: function() { BrowserWindow.getFocusedWindow().webContents.send("appendColumn"); }
-      }
+      },
+      {
+        type: "separator"
+      },
+      {
+        id: "columnMoveToLeft",
+        label: "列を左へ移動(&L)",
+        click: function() { BrowserWindow.getFocusedWindow().webContents.send("columnMoveToLeft"); },
+        accelerator: "CmdOrCtrl+Alt+Left",
+        enabled: false
+      },
+      {
+        id: "columnMoveToRight",
+        label: "列を右へ移動(&R)",
+        click: function() { BrowserWindow.getFocusedWindow().webContents.send("columnMoveToRight"); },
+        accelerator: "CmdOrCtrl+Alt+Right",
+        enabled: false
+      },
+      {
+        id: "columnRemove",
+        label: "列を削除(&M)",
+        click: function() { BrowserWindow.getFocusedWindow().webContents.send("columnRemove"); },
+        accelerator: "CmdOrCtrl+Delete",
+        enabled: false
+      },
+      {
+        type: "separator"
+      },
+      {
+        id: "rowMoveToUpper",
+        label: "行を上へ移動(&U)",
+        click: function() { BrowserWindow.getFocusedWindow().webContents.send("rowMoveToUpper"); },
+        accelerator: "CmdOrCtrl+Alt+Up",
+        enabled: false
+      },
+      {
+        id: "rowMoveToLower",
+        label: "行を下へ移動(&W)",
+        click: function() { BrowserWindow.getFocusedWindow().webContents.send("rowMoveToLower"); },
+        accelerator: "CmdOrCtrl+Alt+Down",
+        enabled: false
+      },
+      {
+        id: "rowRemove",
+        label: "行を削除(&V)",
+        click: function() { BrowserWindow.getFocusedWindow().webContents.send("rowRemove"); },
+        accelerator: "CmdOrCtrl+Shift+Delete",
+        enabled: false
+      },
     ]
   },
   {

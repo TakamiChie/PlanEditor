@@ -7,6 +7,8 @@ global.Menu = electron.Menu;
 global.BrowserWindow = electron.BrowserWindow;
 let mainWindow = null;
 var template = require('./menu').menu;
+const ipc = electron.ipcMain;
+const menu = Menu.buildFromTemplate(template);
 
 app.on("window-all-closed", () => {
   if(process.platform != "darwin"){
@@ -20,7 +22,6 @@ app.on("ready", () => {
   mainWindow.loadURL("file://" + __dirname + "/index.html");
 
   mainWindow.once("ready-to-show", () => {
-    var menu = Menu.buildFromTemplate(template);
     mainWindow.setMenu(menu);
     mainWindow.show();
   });
@@ -28,3 +29,23 @@ app.on("ready", () => {
     mainWindow = null;
   });
 });
+
+/// IPC Events
+
+/**
+ * カラム系メニューのEnabledをきりかえる
+ */
+ipc.on("column_menu_state", (event, arg) => {
+  menu.getMenuItemById("columnMoveToLeft").enabled = arg;
+  menu.getMenuItemById("columnMoveToRight").enabled = arg;
+  menu.getMenuItemById("columnRemove").enabled = arg;
+})
+
+/**
+ * 行系メニューのEnabledをきりかえる
+ */
+ipc.on("row_menu_state", (event, arg) => {
+  menu.getMenuItemById("rowMoveToUpper").enabled = arg;
+  menu.getMenuItemById("rowMoveToLower").enabled = arg;
+  menu.getMenuItemById("rowRemove").enabled = arg;
+})
