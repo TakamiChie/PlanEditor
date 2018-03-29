@@ -74,6 +74,10 @@ ipc.on("fileClose", (e) => {
   menuop_fileClose();
 });
 
+ipc.on("print", (e) => {
+  menuop_print();
+});
+
 ipc.on("appendColumn", (e) => {
   menuop_append_column();
 });
@@ -175,6 +179,17 @@ function menuop_fileClose() {
   }
 }
 
+/**
+ * 印刷
+ */
+function menuop_print(){
+  ipc.send("request_openwindow_print", {
+    parent: BrowserWindow.getFocusedWindow(),
+    fileName: openedFileName,
+    column:  settings.rows,
+    data: tabledata
+  });
+}
 function menuop_append_column() {
   showColumnDialog(true).then((value) => {
     // 設定値更新
