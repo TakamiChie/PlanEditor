@@ -184,7 +184,6 @@ function menuop_fileClose() {
  */
 function menuop_print(){
   ipc.send("request_openwindow_print", {
-    parent: BrowserWindow.getFocusedWindow(),
     fileName: openedFileName,
     column:  settings.rows,
     data: tabledata
