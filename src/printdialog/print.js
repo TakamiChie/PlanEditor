@@ -39,8 +39,7 @@ function createTOCTable(columns, tabledata){
   tabledata.forEach(row => {
     let r = tbody.insertRow();
     columns.forEach(e => {
-      let cell = r.insertCell();
-      cell.textContent = row[e.name];
+      r.insertCell().textContent = row[e.name];
     });
   });
   return table;
