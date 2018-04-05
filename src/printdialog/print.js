@@ -28,6 +28,7 @@ ipc.on("init", (e, arg) => {
  */
 function createTOCTable(columns, tabledata){
   let table = document.createElement("table");
+  table.id = "TOC";
   let thead = table.createTHead();
   let headr = thead.insertRow(0);
   columns.forEach(e => {
