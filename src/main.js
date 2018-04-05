@@ -65,7 +65,6 @@ ipc.on("request_openwindow_print", (event, arg) => {
     show: false,
     skipTaskbar: true,
   });
-  arg.yourself = window;
   window.loadURL(`file://${__dirname}/printdialog/print.html`);
   const printMenu = require('./printdialog/menu').menu;
   window.setMenu(Menu.buildFromTemplate(printMenu));
