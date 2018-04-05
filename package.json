@@ -15,6 +15,7 @@
     "jquery": "^3.3.1",
     "js-yaml": "^3.10.0",
     "less": "^2.7.3",
+    "moment": "^2.22.0",
     "slickgrid": "github:6pac/SlickGrid"
   },
   "dependencies": {}

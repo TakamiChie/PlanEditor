@@ -3,7 +3,21 @@ div#container {
   height: 100%;
   background: white;
   padding: 1em;
+  header{
+    margin-bottom: 0.5em;
+    font-size: 90%;
+    span {
+      min-width: 1em;
+      &#dayLabel{
+        float: left;
+      }
+      &#fileName {
+        float: right;
+      }
+    }
+  }
   table {
+    clear: both;
     width: 100%;
     > thead > tr{
       background:silver;

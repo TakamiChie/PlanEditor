@@ -1,6 +1,7 @@
 const electron = require('electron');
 const ipc = electron.ipcRenderer;
 const remote = electron.remote;
+const path = require('path');
 
 var columns;
 var tabledata;
@@ -25,6 +26,20 @@ ipc.on("init", (e, arg) => {
     });         
   });
   document.querySelector("#container").appendChild(table);
+  document.querySelector("#daylabel").textContent = moment().format("YYYY/MM/DD");
+  document.querySelector("#fileName").textContent = arg.fileName == undefined ? "無題" : path.basename(arg.fileName);
   
   ipc.send("ready");
-})
+});
+
+ipc.on("display_date", () => { refresh_header("#daylabel"); });
+
+ipc.on("display_filename", () => { refresh_header("#fileName"); });
+
+function refresh_header(id) {
+  document.querySelector(id).style.visibility = 
+    document.querySelector(id).style.visibility == "hidden" ? "" : "hidden"  
+  document.querySelector("header").style.display = 
+    document.querySelector("#daylabel").style.visibility == "hidden" &&
+    document.querySelector("#fileName").style.visibility == "hidden" ? "none" : "block";
+}

@@ -14,15 +14,17 @@ exports.menu = [
     label: "表示(&V)",
     submenu: [
       {
-        id: "date",
+        id: "display_date",
         label: "日付(&D)",
         type: "checkbox",
+        checked: true,
         click: clickAction
       },
       {
-        id: "filename",
+        id: "display_filename",
         label: "ファイル名(&F)",
         type: "checkbox",
+        checked: true,
         click: clickAction
       },
     ]
