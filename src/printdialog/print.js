@@ -84,7 +84,11 @@ ipc.on("display_date", () => { refresh_header("#daylabel"); });
 
 ipc.on("display_filename", () => { refresh_header("#fileName"); });
 
-ipc.on("execprint", () => window.print());
+ipc.on("execprint", () => {
+  remote.getCurrentWebContents().print({
+    printBackground :true
+  })
+});
 
 function refresh_header(id) {
   document.querySelector(id).style.visibility = 
