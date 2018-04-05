@@ -6,10 +6,27 @@ const path = require('path');
 var columns;
 var tabledata;
 ipc.on("init", (e, arg) => {
-  columns = arg.column;
-  tabledata = arg.data;
   console.log(arg);
   // 目次データの作成
+  let table = createTOCTable(arg.column, arg.data);
+
+  let atable = createAggregatesTable(arg.aggregatesdata);
+
+  // HTML出力
+  document.querySelector("#container").appendChild(table);
+  if(atable != undefined) document.querySelector("#container").appendChild(atable);
+  document.querySelector("#daylabel").textContent = moment().format("YYYY/MM/DD");
+  document.querySelector("#fileName").textContent = arg.fileName == undefined ? "無題" : path.basename(arg.fileName);
+
+  ipc.send("ready");
+});
+
+/**
+ * 目次テーブルを作成する
+ * @param {array} columns 列データ
+ * @param {array} tabledata テーブルデータ
+ */
+function createTOCTable(columns, tabledata){
   let table = document.createElement("table");
   let thead = table.createTHead();
   let headr = thead.insertRow(0);
@@ -24,19 +41,10 @@ ipc.on("init", (e, arg) => {
     columns.forEach(e => {
       let cell = r.insertCell();
       cell.textContent = row[e.name];
-    });         
+    });
   });
-
-  let atable = createAggregatesTable(arg.aggregatesdata);
-
-  // HTML出力
-  document.querySelector("#container").appendChild(table);
-  if(atable != undefined) document.querySelector("#container").appendChild(atable);
-  document.querySelector("#daylabel").textContent = moment().format("YYYY/MM/DD");
-  document.querySelector("#fileName").textContent = arg.fileName == undefined ? "無題" : path.basename(arg.fileName);
-
-  ipc.send("ready");
-});
+  return table;
+}
 
 /**
  * 集計データテーブルを作成する
