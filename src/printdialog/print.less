@@ -19,6 +19,10 @@ div#container {
   table {
     clear: both;
     width: 100%;
+    th, td{
+      border: gray dashed;
+      border-width: 0 1px;
+    }
     > thead > tr{
       background:silver;
       th{
@@ -33,8 +37,6 @@ div#container {
         background: #EFEFEF;
       }
       td{
-        border: gray dashed;
-        border-width: 0 1px;
         padding: 0 0.5ex;
         &:first-child {
           /* 項番はノーラップで */
