@@ -48,6 +48,15 @@ exports.menu = [
         type: "separator"
       },
       {
+        id: "print",
+        label: "印刷(&P)",
+        accelerator: "CmdOrCtrl+P",
+        click: defClickAction,
+      },
+      {
+        type: "separator"
+      },
+      {
         label: "終了(&X)",
         role: 'quit'
       }

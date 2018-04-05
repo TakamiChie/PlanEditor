@@ -1,0 +1,55 @@
+div#container {
+  width: 100%;
+  height: 100%;
+  background: white;
+  padding: 1em;
+  header{
+    margin-bottom: 0.5em;
+    font-size: 90%;
+    span {
+      min-width: 1em;
+      &#dayLabel{
+        float: left;
+      }
+      &#fileName {
+        float: right;
+      }
+    }
+  }
+  table {
+    clear: both;
+    width: 100%;
+    &#aggregates{
+      margin-top: 1em;
+    }
+    th, td{
+      border: gray dashed;
+      border-width: 0 1px;
+    }
+    > thead > tr{
+      background:silver;
+      th{
+        text-align: center;
+      }
+    }
+    > tbody{
+      > tr:nth-child(2n-1){
+        background: white;
+      }
+      > tr:nth-child(2n){
+        background: #EFEFEF;
+      }
+      td{
+        padding: 0 0.5ex;
+        &:first-child {
+          /* 項番はノーラップで */
+          white-space: nowrap;
+        }
+      }
+    }
+  }
+}
+
+
+
+

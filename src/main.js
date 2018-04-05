@@ -49,3 +49,28 @@ ipc.on("row_menu_state", (event, arg) => {
   menu.getMenuItemById("rowMoveToLower").enabled = arg;
   menu.getMenuItemById("rowRemove").enabled = arg;
 })
+
+/**
+ * プリントダイアログを開く
+ * @param {string} arg.fileName ファイル名
+ * @param {array} arg.column 列データ
+ * @param {array} arg.data テーブルデータ
+ * @param {object} arg.aggregatesdata 集計データ
+ */
+ipc.on("request_openwindow_print", (event, arg) => {
+  let window = new BrowserWindow({
+    parent: BrowserWindow.getFocusedWindow(),
+    modal: true,
+    width: 480,
+    height: 640,
+    show: false,
+    skipTaskbar: true,
+  });
+  window.loadURL(`file://${__dirname}/printdialog/print.html`);
+  const printMenu = require('./printdialog/menu').menu;
+  window.setMenu(Menu.buildFromTemplate(printMenu));
+  ipc.once("ready", () => { window.show(); });
+  window.once("ready-to-show", () => {
+    window.webContents.send("init", arg);
+  });
+});

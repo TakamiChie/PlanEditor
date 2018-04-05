@@ -74,6 +74,10 @@ ipc.on("fileClose", (e) => {
   menuop_fileClose();
 });
 
+ipc.on("print", (e) => {
+  menuop_print();
+});
+
 ipc.on("appendColumn", (e) => {
   menuop_append_column();
 });
@@ -175,6 +179,17 @@ function menuop_fileClose() {
   }
 }
 
+/**
+ * 印刷
+ */
+function menuop_print(){
+  ipc.send("request_openwindow_print", {
+    fileName: openedFileName,
+    column:  settings.rows,
+    data: tabledata,
+    aggregatesdata: aggregates(false)
+  });
+}
 function menuop_append_column() {
   showColumnDialog(true).then((value) => {
     // 設定値更新
@@ -539,8 +554,10 @@ function renumber() {
 
 /**
  * 集計行の再集計処理を行う
+ * @param {boolean} display_update 表示の更新を行う。falseを指定すると、更新を行わず戻り値のみ返却する
+ * @returns {object} 集計結果を示すデータ
  */
-function aggregates() {
+function aggregates(display_update = true) {
   var start = new Date().getTime(); 
   console.log("aggregate started");
   // 集計配列の作成
@@ -568,21 +585,24 @@ function aggregates() {
   }
 
   console.log(aggregate);
-  let status = "";
-  let hint = "";
-  Object.keys(aggregate).forEach((a, i) => {
-    status += `${a}: ${aggregate[a].TOTAL}`;
-    hint += `${a}: ${aggregate[a].TOTAL}\n`; 
-    Object.keys(aggregate[a]).forEach((key) => {
-      if(key.charAt(0) == "e" && key.length > 1){
-        hint += `  ${key.substring(1)}: ${aggregate[a][key]}\n`;
-      }
+  if(display_update){
+    let status = "";
+    let hint = "";
+    Object.keys(aggregate).forEach((a, i) => {
+      status += `${a}: ${aggregate[a].TOTAL}`;
+      hint += `${a}: ${aggregate[a].TOTAL}\n`; 
+      Object.keys(aggregate[a]).forEach((key) => {
+        if(key.charAt(0) == "e" && key.length > 1){
+          hint += `  ${key.substring(1)}: ${aggregate[a][key]}\n`;
+        }
+      });
     });
-  });
-  var aggregates_fields = document.querySelector("#sb_aggregates");
-  aggregates_fields.textContent = status;
-  aggregates_fields.title = hint;
+    var aggregates_fields = document.querySelector("#sb_aggregates");
+    aggregates_fields.textContent = status;
+    aggregates_fields.title = hint;
+  }
 
+  return aggregate;
   console.log(`aggregate finished ${new Date().getTime() - start} ms`);
 }
 
