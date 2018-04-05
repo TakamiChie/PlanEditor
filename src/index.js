@@ -186,7 +186,8 @@ function menuop_print(){
   ipc.send("request_openwindow_print", {
     fileName: openedFileName,
     column:  settings.rows,
-    data: tabledata
+    data: tabledata,
+    aggregatesdata: aggregates(false)
   });
 }
 function menuop_append_column() {

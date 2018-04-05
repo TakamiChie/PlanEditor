@@ -55,6 +55,7 @@ ipc.on("row_menu_state", (event, arg) => {
  * @param {string} arg.fileName ファイル名
  * @param {array} arg.column 列データ
  * @param {array} arg.data テーブルデータ
+ * @param {object} arg.aggregatesdata 集計データ
  */
 ipc.on("request_openwindow_print", (event, arg) => {
   let window = new BrowserWindow({
