@@ -91,7 +91,7 @@ ipc.on("columnMoveToRight", (e) => {
 });
 
 ipc.on("columnRemove", (e) => {
-  if(confirm(settings.rows[grid.getActiveCell().cell].name + "を削除しますか？")){
+  if(confirm(settings.columns[grid.getActiveCell().cell].name + "を削除しますか？")){
     removeColumn(grid.getActiveCell().cell);
   }
 });
@@ -185,7 +185,7 @@ function menuop_fileClose() {
 function menuop_print(){
   ipc.send("request_openwindow_print", {
     fileName: openedFileName,
-    column:  settings.rows,
+    column:  settings.columns,
     data: tabledata,
     aggregatesdata: aggregates(false)
   });
@@ -193,7 +193,7 @@ function menuop_print(){
 function menuop_append_column() {
   showColumnDialog(true).then((value) => {
     // 設定値更新
-    settings.rows.push({name: value.name, role: value.role});
+    settings.columns.push({name: value.name, role: value.role});
     resetHeaderRow(getEditorUI());
     renumber();
     aggregates();
@@ -243,7 +243,7 @@ function fileOpen(fileName) {
         alert("ファイルが読み込めません。ファイルが破損している可能性があります。");
       }else if(loadData.filever.split(".").shift() == "1")
       {
-        settings.rows = loadData.rows;
+        settings.columns = loadData.columns;
         let editorui = getEditorUI();
         // ファイル読み込み
         resetHeaderRow(editorui);
@@ -253,9 +253,10 @@ function fileOpen(fileName) {
         tabledata = [];
         table.forEach(rowdata => {
           var row = {}
-          settings.rows.forEach(r => {
+          settings.columns.forEach(r => {
             if(r.name != "項番"){
-              row[r.name] = rowdata[r.name];
+              let rd = rowdata["data"];
+              row[r.name] = rd[r.name];
             }
           });
           tabledata.push(row);
@@ -283,14 +284,16 @@ function fileSave(fileName){
   var serialize = {};
   let editorui = getEditorUI();
   serialize["filever"] = FILEVERSION;
-  serialize["rows"] = settings.rows;
+  serialize["columns"] = settings.columns;
   serialize["data"] = [];
   tabledata.forEach((data) => {
+    let rowprop = {}
     let rowdata = {}
-    settings.rows.forEach(c => {
+    settings.columns.forEach(c => {
       rowdata[c.name] = (data[c.name] || "");
     });
-    serialize["data"].push(rowdata);
+    rowprop["data"] = rowdata;
+    serialize["data"].push(rowprop);
   });
   const fs = require("fs");
   const yaml = require("js-yaml");
@@ -337,7 +340,7 @@ function setOpenedFileName(newFileName){
  * @param {boolean} row 行操作系メニューのEnabledを切り替える
  */
 function cellMenuUpdate(column = true, row = true) {
-  if(column){ ipc.send("column_menu_state", settings.rows.length > 2); }
+  if(column){ ipc.send("column_menu_state", settings.columns.length > 2); }
   if(row){ ipc.send("row_menu_state", tabledata.length > 1); }
 }
 /**
@@ -377,7 +380,7 @@ function swapRow(srcIndex, dstIndex){
  * @param {number} index 削除する行のインデックス 
  */
 function removeRow(index){
-  if(1 > index || index >= settings.rows.length){
+  if(1 > index || index >= settings.columns.length){
     throw "Range Error At index";
   }
   redrawGrid(undefined, () => {
@@ -399,20 +402,20 @@ function swapColumn(srcIndex, dstIndex){
   }
   let sd = [srcIndex, dstIndex];
   for (let i = 0; i < sd.length; i++) {
-    if(sd[i] > settings.rows.length - 1){
+    if(sd[i] > settings.columns.length - 1){
       sd[i] = 1;
     }
     if(sd[i] < 1){
-      sd[i] = settings.rows.length - 1;
+      sd[i] = settings.columns.length - 1;
     }
   };
   srcIndex = sd[0];
   dstIndex = sd[1];
   console.log(`swapColumn(${srcIndex}, ${dstIndex})`);
   // 設定値の並び替え
-  var tmp = settings.rows[srcIndex];
-  settings.rows[srcIndex] = settings.rows[dstIndex];
-  settings.rows[dstIndex] = tmp;
+  var tmp = settings.columns[srcIndex];
+  settings.columns[srcIndex] = settings.columns[dstIndex];
+  settings.columns[dstIndex] = tmp;
   resetHeaderRow(getEditorUI());
   saveSettings();
   return [srcIndex, dstIndex];
@@ -423,10 +426,10 @@ function swapColumn(srcIndex, dstIndex){
  * @param {number} index 削除する列のインデックス 
  */
 function removeColumn(index){
-  if(1 > index || index >= settings.rows.length){
+  if(1 > index || index >= settings.columns.length){
     throw "Range Error At index";
   }
-  settings.rows.splice(index, 1);
+  settings.columns.splice(index, 1);
   resetHeaderRow(getEditorUI());
   saveSettings();
 }
@@ -450,7 +453,7 @@ function showColumnDialog(append = false, name = "", role = ROLE.CHAPTER){
       // 列名が空白または、すでに存在する列名でないかチェック
       // ※ ただし、列を編集するとき、列名を変えてなければエラーを出さない
       if(cn.value == ""){ msg = "列名を指定してください"; }
-      else if((settings.rows.find(r => r.name == cn.value) != undefined || 
+      else if((settings.columns.find(r => r.name == cn.value) != undefined || 
         !append && name == cn.value)){
         if(append){
           msg = "既存の列と<br>同じ名前の列は作成できません";        
@@ -460,7 +463,7 @@ function showColumnDialog(append = false, name = "", role = ROLE.CHAPTER){
       }
       // すでに担当者列がないかどうかチェック
       if(!append || cr.value == ROLE.CHARGE){
-        if(settings.rows.find(r => r.role == ROLE.CHARGE) != undefined){
+        if(settings.columns.find(r => r.role == ROLE.CHARGE) != undefined){
           msg = "担当者列を二つ以上<br>定義することは出来ません";
         };
       }
@@ -521,7 +524,7 @@ function renumber() {
   var indexes = [];
   var cprev;
   var ccur;
-  settings.rows.forEach((r) => {
+  settings.columns.forEach((r) => {
     if(r.role == ROLE.CHAPTER){
       indexes.push(r.name);
       no.push(0);
@@ -563,7 +566,7 @@ function aggregates(display_update = true) {
   // 集計配列の作成
   var aggregate = {};
   var charge = undefined;
-  settings.rows.forEach((r) => {
+  settings.columns.forEach((r) => {
     if(r.role == ROLE.AGGREGATE){
       aggregate[r.name] = {TOTAL:0};
     }
@@ -612,7 +615,7 @@ function aggregates(display_update = true) {
  */
 function resetHeaderRow(editorui) {
   var columns = [];
-  settings.rows.forEach((r, i) => {
+  settings.columns.forEach((r, i) => {
     var column = {}; 
     column.id = r.name;
     column.name = r.name;
@@ -696,7 +699,7 @@ function init(){
   // 初期値設定
   settings = {
     // TODO: デフォルト値を外部化
-    rows : [
+    columns : [
       {
         name: "項番",
         role: ROLE.STATIC
@@ -729,6 +732,10 @@ function init(){
       resolve();
     });
   }).then(() => {
+    if(settings.rows){
+      settings.columns = settings.rows;
+      delete settings.rows;
+    }
     console.log(settings);
     // テーブル初期化
     let editorui = getEditorUI();
