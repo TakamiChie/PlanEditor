@@ -1,5 +1,5 @@
 {
-  "name": "wdchamomile",
+  "name": "PlanEditor",
   "version": "0.1.0",
   "description": "Spreadsheet editor for proposal preparation.",
   "main": "src/main.js",

@@ -3,24 +3,23 @@ const packager = require("electron-packager");
 const package = require("./package.json");
 
 packager({
+    dir: ".",
     name: package["name"],
-    dir: ".",// ソースフォルダのパス
-    out: "./dist",// 出力先フォルダのパス
-    icon: "./icon/appicon.ico",// アイコンのパス
-    platform: "win32",
+    appCopyright: `Copyright (C) 2018 ${package["author"]}.`,
+    appVersion: package["version"],
     arch: "x64",
-    version: "1.0.1",// Electronのバージョン
-    overwrite: true,// 上書き
-    asar: false,// asarパッケージ化
-    "app-version": package["version"],// アプリバージョン
-    "app-copyright": "Copyright (C) 2018 "+package["author"]+".",// コピーライト
-    
-    "version-string": {// Windowsのみのオプション
+    aser: true,
+    executableName: "pedit",
+    icon: "./icon/appicon.ico",
+    out: "./dist",
+    overwrite: true,
+    platform: "win32",
+    versionString: {
         CompanyName: "横浜IT勉強会",
         FileDescription: package["name"],
-        OriginalFilename: package["name"]+".exe",
+        OriginalFilename: "pedit.exe",
         ProductName: package["name"],
-        InternalName: package["name"]
+        InternalName: "WDChamomile"
     }
     
 }, function (err, appPaths) {// 完了時のコールバック
