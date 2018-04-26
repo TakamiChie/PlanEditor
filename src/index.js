@@ -255,7 +255,8 @@ function fileOpen(fileName) {
           var row = {}
           settings.columns.forEach(r => {
             if(r.name != "項番"){
-              row[r.name] = rowdata[r.name];
+              let rd = rowdata["data"];
+              row[r.name] = rd[r.name];
             }
           });
           tabledata.push(row);
@@ -286,11 +287,13 @@ function fileSave(fileName){
   serialize["columns"] = settings.columns;
   serialize["data"] = [];
   tabledata.forEach((data) => {
+    let rowprop = {}
     let rowdata = {}
     settings.columns.forEach(c => {
       rowdata[c.name] = (data[c.name] || "");
     });
-    serialize["data"].push(rowdata);
+    rowprop["data"] = rowdata;
+    serialize["data"].push(rowprop);
   });
   const fs = require("fs");
   const yaml = require("js-yaml");
