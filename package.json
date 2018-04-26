@@ -9,15 +9,16 @@
   "author": "TakamiChie",
   "license": "MIT",
   "devDependencies": {
+    "electron-packager": "^12.0.1",
+    "less": "^3.0.2"
+  },
+  "dependencies": {
     "bootstrap-honoka": "^3.3.7-a",
     "electron": "^1.8.4",
-    "electron-json-storage": "^4.0.3",
-    "electron-packager": "^12.0.1",
+    "electron-json-storage": "^4.1.0",
     "jquery": "^3.3.1",
     "js-yaml": "^3.11.0",
-    "less": "^2.7.3",
-    "moment": "^2.22.0",
+    "moment": "^2.22.1",
     "slickgrid": "github:6pac/SlickGrid"
-  },
-  "dependencies": {}
+  }
 }
