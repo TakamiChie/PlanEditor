@@ -31,6 +31,10 @@ const ROLE = {
    */
   NUMBER: "NUMBER",
   /**
+   * セルは特に意味を持たない真偽値セルであることを示す。
+   */
+  BOOLEAN: "BOOLEAN",
+  /**
    * セルは特に意味を持たない日付セルであることを示す。
    */
   DATE: "DATE",
@@ -642,6 +646,10 @@ function resetHeaderRow(editorui) {
         break;
       case ROLE.TEXT:
         column.editor = Slick.Editors.LongText;
+        break;
+      case ROLE.BOOLEAN:
+        column.editor = Slick.Editors.Checkbox;
+        column.formatter = Slick.Formatters.YesNo;
         break;
       case ROLE.NUMBER:
         column.sortable = true;
