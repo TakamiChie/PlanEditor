@@ -658,6 +658,7 @@ function resetHeaderRow(editorui) {
       case ROLE.DATE:
         column.sortable = true;
         column.editor = Slick.Editors.Date;
+        column.formatter = Slick.Formatters.LocaleSupportedDate;
         break;
       default:
         throw `Invalid Role At ${r.name}`;
