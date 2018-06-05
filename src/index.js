@@ -745,6 +745,12 @@ function init(){
       settings.columns = settings.rows;
       delete settings.rows;
     }
+    // ウィンドウ設定の復元
+    let window = BrowserWindow.getFocusedWindow()
+    window.setBounds(settings.bounds, false);
+    if(settings.maximized) window.maximize();
+    if(settings.fullScreen) window.fullscreen();
+
     console.log(settings);
     // テーブル初期化
     let editorui = getEditorUI();
@@ -752,4 +758,20 @@ function init(){
   });
 }
 
+/**
+ * アンロード前の処理を行う
+ */
+function beforeUnload(){
+  // ウィンドウ設定の保存
+  let window = BrowserWindow.getFocusedWindow();
+  if(!window.isMaximized() && !window.isFullScreen()){
+    settings.bounds = window.getBounds();
+  }
+  settings.maximized = window.isMaximized();
+  settings.fullscreen = window.isFullScreen();
+  saveSettings();
+  event.preventDefault();
+}
+
+window.addEventListener("beforeunload", beforeUnload);
 init();
