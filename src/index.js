@@ -747,8 +747,10 @@ function init(){
     }
     // ウィンドウ設定の復元
     let window = BrowserWindow.getFocusedWindow()
-    if(settings.bounds)
-      window.setBounds(settings.bounds, false);
+    if(settings.bounds){
+      window.setPosition(settings.bounds.x, settings.bounds.y, false);
+      window.setSize(settings.bounds.width, settings.bounds.height, false);
+    }
     if(settings.maximized) window.maximize();
     if(settings.fullScreen) window.fullscreen();
 
