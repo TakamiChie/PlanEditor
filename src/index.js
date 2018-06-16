@@ -572,7 +572,10 @@ function aggregates(display_update = true) {
   var charge = undefined;
   settings.columns.forEach((r) => {
     if(r.role == ROLE.AGGREGATE){
-      aggregate[r.name] = {TOTAL:0};
+      aggregate[r.name] = {TOTAL:0, TYPE: r.role};
+    }
+    if(r.role == ROLE.BOOLEAN){
+      aggregate[r.name] = {TOTAL:0, TYPE: r.role};
     }
     if(r.role == ROLE.CHARGE){
       charge = r.name;
@@ -581,7 +584,7 @@ function aggregates(display_update = true) {
   // 集計処理の開始
   for (let i = 0; i < tabledata.length; i++) {
     Object.keys(aggregate).forEach((a) => {
-      let c = parseFloat(tabledata[i][a]);
+      let c = typeof(tabledata[i][a]) == "boolean" ? 1 : parseFloat(tabledata[i][a]);
       cn = isNaN(c) ? 0 : c;
       aggregate[a].TOTAL += cn;
       if(charge != undefined){
