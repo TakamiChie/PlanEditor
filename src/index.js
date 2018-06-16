@@ -572,10 +572,10 @@ function aggregates(display_update = true) {
   var charge = undefined;
   settings.columns.forEach((r) => {
     if(r.role == ROLE.AGGREGATE){
-      aggregate[r.name] = {TOTAL:0, TYPE: r.role};
+      aggregate[r.name] = {TOTAL:0, TYPE: r.role, UNIT: r.unit};
     }
     if(r.role == ROLE.BOOLEAN){
-      aggregate[r.name] = {TOTAL:0, TYPE: r.role};
+      aggregate[r.name] = {TOTAL:0, TYPE: r.role, UNIT: r.unit};
     }
     if(r.role == ROLE.CHARGE){
       charge = r.name;
@@ -599,11 +599,12 @@ function aggregates(display_update = true) {
     let status = "";
     let hint = "";
     Object.keys(aggregate).forEach((a, i) => {
-      status += `${a}: ${aggregate[a].TOTAL}`;
-      hint += `${a}: ${aggregate[a].TOTAL}\n`; 
+      let unit = aggregate[a].UNIT != undefined ? aggregate[a].UNIT : "";
+      status += `${a}: ${aggregate[a].TOTAL}${unit}`;
+      hint += `${a}: ${aggregate[a].TOTAL}${unit}\n`; 
       Object.keys(aggregate[a]).forEach((key) => {
         if(key.charAt(0) == "e" && key.length > 1){
-          hint += `  ${key.substring(1)}: ${aggregate[a][key]}\n`;
+          hint += `  ${key.substring(1)}: ${aggregate[a][key]}${unit}\n`;
         }
       });
     });

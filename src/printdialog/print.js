@@ -67,12 +67,14 @@ function createAggregatesTable(aggregatesdata) {
   headr.appendChild(ch("合計"));
   Object.keys(aggregatesdata).forEach(aggregate => {
     let r = tbody.insertRow();
+    let unit = aggregatesdata[aggregate].UNIT != undefined ? 
+    aggregatesdata[aggregate].UNIT : "";
     r.insertCell().textContent = aggregate;
-    r.insertCell().textContent = aggregatesdata[aggregate].TOTAL;
+    r.insertCell().textContent = aggregatesdata[aggregate].TOTAL + unit;
     Object.keys(aggregatesdata[aggregate]).forEach(key => {
       if(key.charAt(0) == "e" && key.length > 1){
         if(firstChild) headr.appendChild(ch(key.substring(1)));
-        r.insertCell().textContent = aggregatesdata[aggregate][key];
+        r.insertCell().textContent = aggregatesdata[aggregate][key] + unit;
       }
     });
     firstChild = false;
